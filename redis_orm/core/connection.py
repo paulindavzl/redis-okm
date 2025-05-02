@@ -9,6 +9,7 @@ import redis.exceptions
 from ..core import _model
 from .configure import Settings
 from ..models.getter_model import Getter
+from ..exceptions.connection_exceptions import *
 
 
 class RedisConnect:
@@ -25,7 +26,7 @@ class RedisConnect:
             settings = model.__settings__
 
             if not isinstance(settings, Settings):
-                raise TypeError(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
+                raise RedisConnectionSettingsInstanceException(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
             
             is_testing = getattr(model, "__testing__", False)
         else:
@@ -33,9 +34,9 @@ class RedisConnect:
             settings = kwargs.get("settings")
 
             if not isinstance(settings, Settings):
-                raise TypeError(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
+                raise RedisConnectionSettingsInstanceException(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
             
-            is_testing = settings.testing
+            is_testing = getattr(settings, "testing", False)
 
             if isinstance(db, str):
                 db = settings.get_db(db)
@@ -48,11 +49,10 @@ class RedisConnect:
                 _redis.ping()
                 return _redis
             except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
-                if attempts < tries:
+                if attempts < tries - 1:
                     time.sleep(.5)
                     continue
-                raise ValueError("")
-                raise ConnectionError(f"Unable to connect to Redis database: {e.__str__()}")
+                raise RedisConnectConnectionFailedException(f"Unable to connect to Redis database: {e.__str__()}")
 
 
     
@@ -77,13 +77,13 @@ class RedisConnect:
 
         Params:
 
-            model - modelo que usa BaseModel (instanciado)
+            model - modelo que usa RedisModel (instanciado)
 
             exists_ok (bool) - quando True, atualiza o valor do registro, caso exista. Se False, gera um erro (ValueError) caso já exista um registro com aquele ID (padrão False)
 
         Examples:
 
-            class UserModel(BaseModel):
+            class UserModel(RedisModel):
             
                 __idname__ = "id"
                 ...
@@ -101,7 +101,7 @@ class RedisConnect:
 
         """
         if not model.__instancied__:
-            raise TypeError("The model must be instantiated to be added to the database!")
+            raise RedisConnectionModelInstanceException("The model must be instantiated to be added to the database!")
 
         idname = model.__idname__
         identify = getattr(model, idname)
@@ -113,7 +113,7 @@ class RedisConnect:
  
         redis_handler = RedisConnect._connect(model)
         if RedisConnect.exists(model) and not exists_ok:
-            raise ValueError(f"This {idname} ({identify}) already exists in the database!")
+            raise RedisConnectionAlreadyRegisteredException(f"This {idname} ({identify}) already exists in the database!")
         redis_handler.hset(name, mapping=model.to_dict)
 
 
@@ -124,13 +124,13 @@ class RedisConnect:
 
         Params:
 
-            model - modelo que usa BaseModel
+            model - modelo que usa RedisModel
 
             identify (Any) - identificador do registro que será verificado. Caso o modelo esteja instanciado, não é obrigatório (padrão None)
 
         Examples:
 
-            class UserModel(BaseModel):
+            class UserModel(RedisModel):
                 ...
 
             user = UserModel(...)
@@ -142,7 +142,7 @@ class RedisConnect:
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
         """
         if not model.__instancied__ and identify is None:
-            raise ValueError(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
+            raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
 
         if model.__instancied__ and identify is None:
             identify = getattr(model, model.__idname__)
@@ -162,11 +162,11 @@ class RedisConnect:
 
         Params:
 
-            model - modelo que usa BaseModel
+            model - modelo que usa RedisModel
 
         Examples:
 
-            class UserModel(BaseModel):
+            class UserModel(RedisModel):
                 ...
 
             
@@ -201,7 +201,7 @@ class RedisConnect:
 
         Params:
 
-            model - modelo que usa BaseModel
+            model - modelo que usa RedisModel
 
             identify (Any|list) - identificador (es) do registro que será apagado. Caso o modelo esteja instanciado, não é obrigatório (padrão None)
 
@@ -209,7 +209,7 @@ class RedisConnect:
 
         Examples:
 
-            class UserModel(BaseModel):
+            class UserModel(RedisModel):
                 ...
 
             
@@ -228,7 +228,7 @@ class RedisConnect:
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
         """
         if not model.__instancied__ and identify is None:
-            raise ValueError(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
+            raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
 
         if model.__instancied__ and identify is None:
             identify = getattr(model, model.__idname__)
@@ -237,7 +237,7 @@ class RedisConnect:
         def _delete(delete_model: _model):
             if not non_existent_ok and not RedisConnect.exists(delete_model):
                 idname = delete_model.__idname__
-                raise ValueError(f"This {idname} ({getattr(delete_model, idname)}) does not exist in the database!")
+                raise RedisConnectNoRecordsException(f"This {idname} ({getattr(delete_model, idname)}) does not exist in the database!")
             
             name = RedisConnect._get_name(delete_model)
             redis_handler = RedisConnect._connect(delete_model)
@@ -263,11 +263,11 @@ class RedisConnect:
 
         Params:
 
-            model - modelo que usa BaseModel
+            model - modelo que usa RedisModel
 
         Examples:
 
-            class UserModel(BaseModel):
+            class UserModel(RedisModel):
                 ...
 
             

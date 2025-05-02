@@ -1,6 +1,17 @@
 # RedisORM
 
-Uma **ORM** _simples_ e _poderosa_ que facilita a conexão e manipulação do banco de dados do [Redis](https://redis.io/ "Redis - The Real-time Data Platform").
+Uma **ORM** _simples_ e _poderosa_ que facilita a conexão e manipulação do banco de dados do **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
+
+## Sumário
+
+* **[Instalação](#instalação "Guia de instalação")** - veja como instalar o **RedisORM**.
+* **[CRUD Básico com RedisORM](#crud-básico-com-redisorm "Guia de como realizar um CRUD simples com RedisORM")** - veja como fazer um **CRUD** com **RedisORM**.
+  * **[1. Crie modelos](#1-crie-modelos "Guia de como criar modelos")** - veja como criar os modelos usados no **RedisORM**.
+  * **[2. Adicione ou atualize registros no banco de dados](#2-adicione-ou-atualize-registros-no-banco-de-dados "Veja como adicionar ou atualizar registros no banco de dados Redis")** - veja como adicionar ou atualizar registros com **RedisORM**.
+  * **[3. Obtenha modelos do banco de dados](#3-obtenha-modelos-do-banco-de-dados "Veja como obter dados do banco de dados Redis")** - veja como obter registros com **RedisORM**.
+  * **[4. Apague um ou mais registros do banco de dados](#4-apague-um-ou-mais-registros-do-banco-de-dados "Veja como apagar registros do banco de dados Redis")** - veja como apagar registros com **RedisORM**.
+* **[Configurações](#configurações-de-conexão-e-outros "Veja como fazer uma simples configuração do RedisORM")** - veja como configurar o **RedisORM**.
+* **[Docs](#docs "Veja a documentação adicional do RedisORM")** - veja a documentação detalhada com exemplos e conceitos.
 
 ## Instalação
 
@@ -10,7 +21,7 @@ Uma **ORM** _simples_ e _poderosa_ que facilita a conexão e manipulação do ba
 git clone git@github.com:paulindavzl/redis-orm.git
 ```
 
-ou **Instale do repositório [PyPI](https://pypi.org/project/redis-orm-py/ "RedisORM"):**
+Ou **instale pelo [PyPI](https://pypi.org/project/redis-orm-py/ "RedisORM"):**
 
 ```bash
 pip install redis-orm
@@ -20,17 +31,19 @@ pip install redis-orm
 
 ## CRUD Básico com RedisORM
 
-### Crie modelos
+### 1. Crie modelos
 
-Modelos devem usar **BaseModel:**
+Um modelo é a representação de uma tabela em um banco de dados. Embora o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")** não funcione com o formato **tabela/coluna** como o  **SQL** , o **RedisORM** se organiza de maneira semelhante a esse formato.
+
+Modelos devem herdar de **RedisModel:**
 
 ```python
 import datetime as dt 
 
-from redis_orm.tools import BaseModel, RedisConnect
+from redis_orm.tools import RedisModel, RedisConnect
 
 
-class UserModel(BaseModel):
+class UserModel(RedisModel):
 	__db__ = 0 # informe o índice do banco de dados usando __db__ (obrigatório)
 	__idname__ = "uid" # não é obrigatório informar o ID. Caso não informado, o primeiro atributo será considerado ID. Caso informado, não é necessário declará-lo no modelo
 
@@ -53,9 +66,9 @@ user = UserModel(
 ...
 ```
 
-### Adicione/atualize um modelo no banco de dados
+### 2. Adicione ou atualize registros no banco de dados
 
-Use **[RedisConnect](#RedisConnect "Veja mais sobre RedisConnect")** para comunicar-se com o banco de dados **[Redis](https://redis.io/ "Redis - The Real-time Data Platform"):**
+Use **[RedisConnect](https://chatgpt.com/c/6814f9d6-2fd8-8004-8fc6-f375e81b08ad#redisconnect "Veja mais sobre RedisConnect")** para comunicar-se com o banco de dados **[Redis](https://redis.io/ "Redis - The Real-time Data Platform"):**
 
 ```python
 ...
@@ -70,17 +83,17 @@ RedisConnect.add(model=user, exists_ok=True) # isso atualizará o registro (caso
 ...
 ```
 
-### Obtenha modelos do banco de dados
+### 3. Obtenha modelos do banco de dados
 
 ```python
 ...
 
 # use RedisConnect.get(...) para obter registros
-models = RedisConnect.get(model=UserModel) # caso exista mais de um registro deste modelo, uma classe Getter será retornada. Caso exista somente um registro, o modelo dele será retorna. Se não existir nenhum registro, o retorno será None
+models = RedisConnect.get(model=UserModel) # caso exista mais de um registro deste modelo, uma classe Getter será retornada. Caso exista somente um registro, o modelo dele será retornado. Se não existir nenhum registro, o retorno será None
 
 
 # caso o retorno de RedisConnect.get(...) seja Getter, existem alguns métodos para realizar consultas específicas
-model_uid_1 = models.filter_by(uid=1) # retorna um registro de ID 1. Caso o parâmetro usando para filtrar retorne mais de um registro, outro Getter será retornado
+model_uid_1 = models.filter_by(uid=1) # retorna um registro de ID 1. Caso o parâmetro usado para filtrar retorne mais de um registro, outro Getter será retornado
 first_model = models.first() # retorna o primeiro registro obtido
 last_model = models.last() # retorna o último registro obtido
 length = models.length # retorna a quantidade de registros (int) retornados
@@ -89,17 +102,15 @@ length = models.length # retorna a quantidade de registros (int) retornados
 
 ```
 
-
-
 **Obs: O retorno de RedisConnect.get pode ser:**
 
 ```python
-RedisConnect.get(...) -> None # Caso o não exista nenhum registro daquele modelo
+RedisConnect.get(...) -> None # Caso não exista nenhum registro daquele modelo
 RedisConnect.get(...) -> UserModel # Caso só exista um registro daquele modelo (UserModel é exemplo, pode ser qualquer modelo)
 RedisConnect.get(...) -> Getter # Caso exista mais de um registro daquele modelo (Getter possui métodos tipo: filter_by, first, ...)
 ```
 
-### Apague um ou mais registro do banco de dados
+### 4. Apague um ou mais registros do banco de dados
 
 ```python
 ...
@@ -126,7 +137,7 @@ RedisConnect.delete(
 
 ## Configurações de conexão e outros
 
-Ao iniciar um projeto com **RedisORM**, automaticamente será gerado um arquivo **JSON** de configuração será gerado na raiz do seu projeto:
+⚠️ Ao iniciar um projeto com  **RedisORM** , um arquivo **JSON** de configuração chamado `redis_configure.json` será gerado automaticamente na raiz do projeto.
 
 ```json
 {
@@ -163,45 +174,41 @@ Ao iniciar um projeto com **RedisORM**, automaticamente será gerado um arquivo 
 }
 ```
 
-Neste arquivo contém (deve conter) todas as informações que o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")** precisa para conectar-se.
+Este arquivo contém todas as informações necessárias para que o **[Redis](https://redis.io/)** se conecte corretamente.
 
-Você não precisa acessar ou editar as configurações diretamente pelo **JSON**! Para isso, use **[Settings](#Settings "Veja mais sobre Settings"):**
+Você  **não precisa editar o JSON manualmente** ! Use a classe **[Settings](https://chatgpt.com/c/6814f9d6-2fd8-8004-8fc6-f375e81b08ad#settings "Veja mais sobre Settings")** para modificar ou acessar as configurações:
 
 ```python
-from redis_orm.tools import Settings, BaseModel
+from redis_orm.tools import Settings, RedisModel
 
 
 # instancie Settings
-settings = Settings() # ao instanciar Settings, você pode passar o parâmetro "path", que aponta para um arquivio .json. Isso serve para poder criar diferentes configurações para diferentes propósitos
-# por padrão, "path=redis_configure.json"
+settings = Settings() # você pode passar "path" para usar outro arquivo .json (por padrão é "redis_configure.json")
 
 
-# você pode definir configurações usando Settings.set_config(...)
+# defina configurações via Settings.set_config(...)
 settings.set_config(host="localhost", port=6379,...)
 
 
-# você pode obter configurações usando Settings.<nome da configuração>
+# acesse as configurações como atributos
 host = settings.host
 password = settings.password
 
 
-# você também pode atrelar essa instância, com essas configurações à um modelo usando "__settings__"
-class UserModel(BaseModel):
+# associe essas configurações a um modelo usando "__settings__"
+class UserModel(RedisModel):
 	__settings__ = settings
-	__db__ = "tests" # "tests" é um banco de dados nomeado. Você pode fazer isso usando Settings.set_config(dbname="<name>:<index>")
+	__db__ = "tests" # "tests" é um banco nomeado (definido via Settings.set_config(dbname="<name>:<index>"))
 	...
 
 
-# caso você não defina "__settings__", ele receberá uma instância padrão. Você pode modificar essa instância padrão importando-a
-from redis_orm.tools import settings # toda modificação que fizer na instância padrão será refletida aos modelos que à usam
-
+# você também pode modificar a instância padrão
+from redis_orm.tools import settings # todas as alterações afetarão os modelos que usam a instância padrão
 ```
 
-**Settings** também tem suporte a variáveis de ambiente. Veja mais em **[Settings](#Settings "Veja mais sobre Settings")**.
+**Settings** também tem suporte a variáveis de ambiente. Veja mais em  **[Settings](https://chatgpt.com/c/6814f9d6-2fd8-8004-8fc6-f375e81b08ad#settings)** .
 
 ---
-
-
 
 ## Docs
 
@@ -216,6 +223,10 @@ from redis_orm.tools import settings # toda modificação que fizer na instânci
 ### Getter
 
 **Getter** é a classe retornada ao fazer uma consulta com **[RedisConnect](#RedisConnect "Veja mais sobre RedisConnect")**. Ela agrupa o retorno de mais de um modelo e permite consultas personalizadas. Veja mais sobre ela em **[Getter](./docs/Getter.md "Veja mais sobre Getter")**.
+
+### Exceptions
+
+O **RedisORM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./docs/Exceptions.md "Veja mais sobre Exceptions")**.
 
 ### Licença
 

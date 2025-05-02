@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ..core import _model
+from ..exceptions.getter_model_exceptions import *
 
 
 class Getter:
@@ -9,9 +10,16 @@ class Getter:
     """
     def __init__(self, get_returns: list[_model]):
         if not isinstance(get_returns, list):
-            raise TypeError(f"get_returns must be a list! get_returns: {get_returns} ({type(get_returns).__name__})")
-        elif not get_returns:
-            raise ValueError("get_returns must not be empty!")
+            raise GetterNotListModelsException(f"get_returns must be a list! get_returns: {get_returns} ({type(get_returns).__name__})")
+        getter_type: classmethod = None
+        for getter in get_returns:
+            base_name = getter.__base__.__name__ if callable(getter) else getter.__class__.__base__.__name__
+            if base_name != "RedisModel":
+                raise GetterNotRedisModelException(f"All models passed to Getter must be a class that inherits from RedisModel. {type(getter).__name__} does not inherit RedisModel!")
+            elif getter_type and not isinstance(getter, getter_type):
+                raise GetterDifferentModelsException(fr"All models passed to Getter must be of the same type/class ({getter_type.__name__}). {type(getter).__name__} != {getter_type.__name__}")
+            elif not getter_type:
+                getter_type = type(getter)
 
         self._getters = get_returns
 
@@ -33,7 +41,7 @@ class Getter:
             is_valid = True
             for param, condition in conditions.items():
                 if param not in getattr(model, "__annotations__", {}):
-                    raise AttributeError(f"{type(model).__name__} does not have {param} attribute!")
+                    raise GetterAttributeException(f"{type(model).__name__} does not have {param} attribute!")
                 
                 if getattr(model, param) != condition:
                     is_valid = False
@@ -53,7 +61,7 @@ class Getter:
         retorna o primeiro modelo na lista
         """
         if reference is not None and not isinstance(reference, str):
-            raise TypeError(f"reference must be a str (string)! reference: {reference} ({type(reference).__name__})")
+            raise GetterReferenceTypeException(f"reference must be a str (string)! reference: {reference} ({type(reference).__name__})")
         
         if reference:
             models = {}
@@ -61,7 +69,7 @@ class Getter:
             for model in self._getters:
                 ref = getattr(model, reference, None)
                 if ref is None:
-                    raise AttributeError(f"{type(model).__name__} does not have the {reference} attribute!")
+                    raise GetterAttributeException(f"{type(model).__name__} does not have the {reference} attribute!")
                 
                 models[ref] = model
                 references.append(ref)
@@ -80,7 +88,7 @@ class Getter:
         retorna o último modelo na lista
         """
         if reference is not None and not isinstance(reference, str):
-            raise TypeError(f"reference must be a str (string)! reference: {reference} ({type(reference).__name__})")
+            raise GetterReferenceTypeException(f"reference must be a str (string)! reference: {reference} ({type(reference).__name__})")
         
         if reference:
             models = {}
@@ -88,7 +96,7 @@ class Getter:
             for model in self._getters:
                 ref = getattr(model, reference, None)
                 if ref is None:
-                    raise AttributeError(f"{type(model).__name__} does not have the {reference} attribute!")
+                    raise GetterAttributeException(f"{type(model).__name__} does not have the {reference} attribute!")
                 
                 models[ref] = model
                 references.append(ref)

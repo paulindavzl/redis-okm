@@ -1,1 +1,1 @@
-from .base_model import BaseModel
+from .redis_model import RedisModel

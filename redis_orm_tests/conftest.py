@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from redis_orm.models import BaseModel
+from redis_orm.models import RedisModel
 from redis_orm import settings, Settings
 from redis_orm.core.connection import RedisConnect
 
@@ -16,7 +16,7 @@ settings_test = Settings("test_redis_configure.json")
 settings_test.set_config(testing=True, timeout=1, retry_on_timeout=[True, 1])
 
 
-class TestModel(BaseModel):
+class TestModel(RedisModel):
     __test__ = False
     __db__ = "tests"
     __tablename__ = "test"

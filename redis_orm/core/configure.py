@@ -2,6 +2,8 @@ import os
 import json
 import dotenv
 
+from ..exceptions.configure_exceptions import *
+
 
 class Settings:
     """
@@ -52,7 +54,7 @@ class Settings:
         self._envfile = self._settings.get("envfile")
         if self._envfile:
             if not os.path.exists(self._envfile):
-                raise FileNotFoundError(f"The {self._envfile} file for environment variables was not found!")
+                raise SettingsEnvfileNotFountException(f"The {self._envfile} file for environment variables was not found!")
 
         for set_names, settings in self._settings.items():
             if isinstance(settings, dict) and set_names != "dbnames":
@@ -76,7 +78,7 @@ class Settings:
         env = os.getenv(value)
         print(env, value)
         if env is None:
-            raise EnvironmentError(f'"{value}" key does not exist in environment variables ({self._envfile})!')
+            raise SettingsEnvkeyException(f'"{value}" key does not exist in environment variables ({self._envfile})!')
         value = typ(env)
 
         return value
@@ -180,7 +182,7 @@ class Settings:
         """
         if dbname in self._dbnames:
             return self._dbnames[dbname]
-        raise KeyError(f'There is no database named: {dbname}! User settings.set_config(dbname="{dbname}:db_index")')
+        raise SettingsUnknownDBException(f'There is no database named: {dbname}! User settings.set_config(dbname="{dbname}:db_index")')
 
 
     def set_config(self, **configs):
@@ -245,7 +247,7 @@ class Settings:
                         value = int(split[1].strip())
                         dbs = {v: k for k, v in self._dbnames.items()}
                         if value in dbs.keys():
-                            raise ValueError(f'Could not set database "{config}" with index {value} because it already belongs to a database named ({dbs[value]}: {value})!')
+                            raise SettingsExistingDBException(f'Could not set database "{config}" with index {value} because it already belongs to a database named ({dbs[value]}: {value})!')
                         settings[local][config] = value
                 settings[local][config] = value
             else:

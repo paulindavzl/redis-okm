@@ -1,6 +1,7 @@
 import os
 import json
 import dotenv
+import string
 
 from ..exceptions.configure_exceptions import *
 
@@ -54,7 +55,7 @@ class Settings:
         self._envfile = self._settings.get("envfile")
         if self._envfile:
             if not os.path.exists(self._envfile):
-                raise SettingsEnvfileNotFountException(f"The {self._envfile} file for environment variables was not found!")
+                raise SettingsEnvfileNotFoundException(f"The {self._envfile} file for environment variables was not found!")
 
         for set_names, settings in self._settings.items():
             if isinstance(settings, dict) and set_names != "dbnames":
@@ -69,6 +70,16 @@ class Settings:
 
             elif set_names != "envfile":
                 setattr(self, set_names, settings)
+
+        if self.prefix == "cwd":
+            chars = list(string.ascii_lowercase + string.digits + "_")
+            splits = os.getcwd().split(os.sep)
+            prefix = splits[-1].lower().replace("-", "_")
+            for c in prefix:
+                if c not in chars:
+                    prefix = prefix.replace(c, "")
+            
+            self.prefix = prefix
 
 
     def _get_env_value(self, config_name: str, value: str) -> any:
@@ -123,7 +134,7 @@ class Settings:
     
     def _default_configure(self):
         default = {
-            "envfile": "",
+            "envfile": None,
             "tests": {
                 "use_tests": True,
                 "db": "tests",
@@ -132,7 +143,7 @@ class Settings:
             "network": {
                 "host": "localhost",
                 "port": 6379,
-                "password": ""
+                "password": None
             },
             "connection": {
                 "decode_response": True,
@@ -185,12 +196,13 @@ class Settings:
         raise SettingsUnknownDBException(f'There is no database named: {dbname}! User settings.set_config(dbname="{dbname}:db_index")')
 
 
-    def set_config(self, **configs):
+    def set_config(self, edit_dbname: bool=False, **configs):
         """
         Define / altera configurações
 
         Params:
 
+            edit_dbname (bool) - permite editar um banco de dados nomeado
             **configs - configurações que serão definidas
 
         Examples:
@@ -242,12 +254,19 @@ class Settings:
                 if config == "dbname" or config == "dbnames":
                     values = [value] if not isinstance(value, list) else value
                     for v in values:
+                        if not ":" in v:
+                            raise SettingsInvalidDBNameException(f'Database index definition must be in two parts, separated by ":"! Invalid definition: {v}.')
                         split = str(v).split(":")
                         config = split[0].strip()
                         value = int(split[1].strip())
                         dbs = {v: k for k, v in self._dbnames.items()}
-                        if value in dbs.keys():
-                            raise SettingsExistingDBException(f'Could not set database "{config}" with index {value} because it already belongs to a database named ({dbs[value]}: {value})!')
+                        for db_index, dbname in dbs.items():
+                            if (db_index == value and dbname != config) or (dbname == config and db_index != value):
+                                if not edit_dbname:
+                                    named_db =  f"{dbs.get(value, dbname)}: {value if dbs.get(value) else self._dbnames[dbname]}"
+                                    raise SettingsExistingDBException(f'Could not set database "{config}" with index {value} because it already belongs to a named database ({named_db})!')
+                                else:
+                                    settings[local].pop(dbname)
                         settings[local][config] = value
                 settings[local][config] = value
             else:

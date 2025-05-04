@@ -249,7 +249,22 @@ from redis_orm.exceptions import RedisConnectionAlreadyRegisteredException, Redi
 # instância de Settings
 settings = Settings(path="you_settings_path.json") # não é obrigatório informar o arquivo de configuração (padrão: "redis_configure.json")
 
-settings.set_config(dbname="user:0") # nomeio o banco de dados com índice 0 de "user"
+# define algumas configurações básicas (SEM .env)
+settings.set_config(
+    host="localhost", # define o servidor do Redis (padrão "localhost")
+    port=6379, # define a porta de conexão com Redis (padrão 6379)
+    password="your_password", # senha para conexão do Redis (padrão None)
+    dbname="user:0"  # nomeio o banco de dados com índice 0 de "user"
+)
+
+# define algumas configurações básicas (COM .env)
+settings.set_config(
+    envfile=".env", # define um arquivo de variável de ambiente
+    host="env:HOST", # define o servidor (inicia-se com "env:" seguido da chave no .env)
+    port="env:PORT", # define a porta de conexão com Redis
+    password="env:PASSWORD",
+    dbname="user:0"
+)
 
 
 # modelo de Usuário
@@ -282,7 +297,7 @@ class UserModelRepository:
         try:
             RedisConnect.add(user) # tenta adicionar um novo usuário
             response["result"] = "success"
-      
+  
         # caso ocorra um erro
         except RedisConnectionAlreadyRegisteredException: # este erro indica que este modelo de usuário com este ID já possui registro
             response["result"] = "err"
@@ -372,7 +387,6 @@ class UserModelRepository:
             response["result"] = "err"
             response["cause"] = "no_records"
             response["message"] = "The UID provided has no record."
-        # se o erro não for "RedisConnectionAlreadyRegisteredException"
         except Exception as e: 
             if getattr(e, "__redisorm__", False):
                 response["result"] = "err"
@@ -382,6 +396,7 @@ class UserModelRepository:
                 ... # trata o erro
 
         return response
+
 
 ```
 

@@ -1,4 +1,4 @@
-class SettingsEnvfileNotFountException(FileNotFoundError):
+class SettingsEnvfileNotFoundException(FileNotFoundError):
     """
     Envfile not found.
     """
@@ -19,4 +19,10 @@ class SettingsUnknownDBException(KeyError):
 class SettingsExistingDBException(ValueError):
     """
     The database is already named and cannot be overwritten.
+    """
+
+
+class SettingsInvalidDBNameException(ValueError):
+    """
+    Invalid database index definition.
     """

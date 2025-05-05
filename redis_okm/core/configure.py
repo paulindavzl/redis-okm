@@ -15,7 +15,7 @@ class Settings:
         new_settings = Settings()
         new_settings.__configure_path__ = "new_settings_path.json" # note que deve ser um arquivo JSON
         ```
-    Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+    Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
     """
     use_tests: bool
     db_test: str
@@ -189,7 +189,7 @@ class Settings:
                 Settings().set_config(dbnames=["name1:index", "name2:index"])
             '''
 
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         if dbname in self._dbnames:
             return self._dbnames[dbname]
@@ -228,7 +228,7 @@ class Settings:
 
             settings.set_config(my_config="value")
         
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         local_config = {
             "dbname": "dbnames",
@@ -295,5 +295,5 @@ created by:
 ▄▀█ █▀ ▀█▀ █░█ ▀█▀ █▀█
 █▀█ ▄█ ░█░ █▄█ ░█░ █▄█
 
-https://github.com/paulindavzl/redis-orm
+https://github.com/paulindavzl/redis-okm
 """

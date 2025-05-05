@@ -97,7 +97,7 @@ class RedisConnect:
 
             RedisConnect.add(model=user) # gera um erro - "This id (0) already exists in the database!"
 
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
 
         """
         if not model.__instancied__:
@@ -139,7 +139,7 @@ class RedisConnect:
 
             exists = RedisConnect.exists(model=UserModel, identify=0) # retorna True ou False
         
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         if not model.__instancied__ and identify is None:
             raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
@@ -172,7 +172,7 @@ class RedisConnect:
             
             models = RedisConnect.get(UserModel) # o retorno pode ser None, uma instância do modelo ou Getter (grupo de modelos)
 
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
 
         if callable(model):
@@ -225,7 +225,7 @@ class RedisConnect:
 
             RedisConnect.delete(..., non_existent_ok=True)
         
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         if not model.__instancied__ and identify is None:
             raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
@@ -273,7 +273,7 @@ class RedisConnect:
             
             count = RedisConnect.count(UserModel)
 
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         if callable(model):
             model = RedisConnect._get_instance(model)
@@ -311,7 +311,7 @@ class RedisConnect:
 
             RedisConnect.restart_full_db(db=[0, 1], ...) # apaga os dados dos bancos 0 e 1
 
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         
         if db == "__all__":
@@ -331,5 +331,5 @@ created by:
 ▄▀█ █▀ ▀█▀ █░█ ▀█▀ █▀█
 █▀█ ▄█ ░█░ █▄█ ░█░ █▄█
 
-https://github.com/paulindavzl/redis-orm
+https://github.com/paulindavzl/redis-okm
 """

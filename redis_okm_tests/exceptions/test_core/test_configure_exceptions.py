@@ -1,8 +1,8 @@
 import re
 import pytest
 
-from redis_orm import Settings
-from redis_orm.exceptions.configure_exceptions import *
+from redis_okm import Settings
+from redis_okm.exceptions.configure_exceptions import *
 
 
 def test__exceptions__settings__envfile_not_found_exception(test_settings: Settings):

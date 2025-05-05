@@ -6,7 +6,7 @@ from ..exceptions import *
 
 class RedisModel:
     """
-    Base para todos os modelos em RedisORM
+    Base para todos os modelos em RedisOKM
     """
     __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "to_dict"]
 
@@ -33,7 +33,7 @@ class RedisModel:
             
             user = UserModel(name="example_user", age=18)
 
-        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-orm "GitHub RedisORM")
+        Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
 
         # obtém informações do modelo

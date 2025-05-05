@@ -1,10 +1,10 @@
 import re
 import pytest
 
-from redis_orm.models.getter_model import Getter
-from redis_orm.exceptions.getter_model_exceptions import *
+from redis_okm.models.getter_model import Getter
+from redis_okm.exceptions.getter_model_exceptions import *
 
-from redis_orm_tests.conftest import TestModel, RedisModel
+from redis_okm_tests.conftest import TestModel, RedisModel
 
 
 @pytest.fixture

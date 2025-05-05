@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "redis-orm"
+name = "redis-okm"
 version = "0.1.0"
-description = "Mini ORM para REDIS"
+description = "Mini OKM para REDIS"
 authors = ["paulindavzl <paulochz01@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [
-    {include="redis_orm"}
+    {include="redis_okm"}
 ]
 
 [tool.poetry.dependencies]

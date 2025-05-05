@@ -1,7 +1,7 @@
-from redis_orm.models.getter_model import Getter
-from redis_orm.core.connection import RedisConnect
+from redis_okm.models.getter_model import Getter
+from redis_okm.core.connection import RedisConnect
 
-from redis_orm_tests.conftest import TestModel
+from redis_okm_tests.conftest import TestModel
 
 
 def test__redis_connection__add():

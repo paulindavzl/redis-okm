@@ -1,4 +1,4 @@
-from redis_orm_tests.conftest import TestModel, settings_test
+from redis_okm_tests.conftest import TestModel, settings_test
 
 
 # garante que atribuição customizada feita por RedisModel está funcionando

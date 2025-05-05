@@ -1,8 +1,8 @@
 import re
 import pytest
 
-from redis_orm.models import RedisModel
-from redis_orm.exceptions.redis_model_exceptions import *
+from redis_okm.models import RedisModel
+from redis_okm.exceptions.redis_model_exceptions import *
 
 
 def test__exceptions__redis_model__id_exception():

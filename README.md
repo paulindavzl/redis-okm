@@ -1,52 +1,52 @@
-# RedisORM
+# RedisOKM
 
-Uma **ORM** _simples_ e _poderosa_ que facilita a conexão e manipulação do banco de dados do **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
+Uma **OKM** _simples_ e _poderosa_ que facilita a conexão e manipulação do banco de dados do **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
 
 ## Sumário
 
-* **[Instalação](#instalação "Guia de instalação")** - Passo a passo de como instalar o **RedisORM**.
-* **[CRUD Básico com RedisORM](#crud-básico-com-redisorm "Guia de como realizar um CRUD simples com RedisORM")** - Como fazer operações básicas com **RedisORM**.
+* **[Instalação](#instalação "Guia de instalação")** - Passo a passo de como instalar o **RedisOKM**.
+* **[CRUD Básico com RedisOKM](#crud-básico-com-RedisOKM "Guia de como realizar um CRUD simples com RedisOKM")** - Como fazer operações básicas com **RedisOKM**.
 
-  * **[1. Crie modelos](#1-crie-modelos "Guia de como criar modelos")** - Aprenda a criar os modelos  usados no **RedisORM**.
-  * **[2. Adicione ou atualize registros no banco de dados](#2-adicione-ou-atualize-registros-no-banco-de-dados "Veja como adicionar ou atualizar registros no banco de dados Redis")** - Veja como adicionar ou atualizar registros com **RedisORM**.
-  * **[3. Obtenha modelos do banco de dados](#3-obtenha-modelos-do-banco-de-dados "Veja como obter dados do banco de dados Redis")** - Obtenha registros de forma simples com **RedisORM**.
-  * **[4. Apague um ou mais registros do banco de dados](#4-apague-um-ou-mais-registros-do-banco-de-dados "Veja como apagar registros do banco de dados Redis")** - Aprenda a apagar registros com **RedisORM**.
-* **[Configurações](#configurações "Veja como fazer uma simples configuração do RedisORM")** - Configure o **RedisORM** de forma simples.
-* **[Dependências](#dependências "Veja as versões de dependências que são compatíveis com o RedisORM")** - Dependências usadas pelo **RedisORM**.
+  * **[1. Crie modelos](#1-crie-modelos "Guia de como criar modelos")** - Aprenda a criar os modelos  usados no **RedisOKM**.
+  * **[2. Adicione ou atualize registros no banco de dados](#2-adicione-ou-atualize-registros-no-banco-de-dados "Veja como adicionar ou atualizar registros no banco de dados Redis")** - Veja como adicionar ou atualizar registros com **RedisOKM**.
+  * **[3. Obtenha modelos do banco de dados](#3-obtenha-modelos-do-banco-de-dados "Veja como obter dados do banco de dados Redis")** - Obtenha registros de forma simples com **RedisOKM**.
+  * **[4. Apague um ou mais registros do banco de dados](#4-apague-um-ou-mais-registros-do-banco-de-dados "Veja como apagar registros do banco de dados Redis")** - Aprenda a apagar registros com **RedisOKM**.
+* **[Configurações](#configurações "Veja como fazer uma simples configuração do RedisOKM")** - Configure o **RedisOKM** de forma simples.
+* **[Dependências](#dependências "Veja as versões de dependências que são compatíveis com o RedisOKM")** - Dependências usadas pelo **RedisOKM**.
 
-  * **[Principais dependências](#principais-dependências "As principais dependências.")** - Dependências principais e que o **RedisORM** não funciona sem.
-  * **[Dependências para testes](#dependências-para-testes "Dependências usadas em testes.")** - Dependências usadas para testar o **RedisORM**
-* **[Exemplo de uso](#exemplo-de-uso)** - Demonstração prática do **RedisORM** com boas práticas.
-* **[Docs](#docs "Veja a documentação adicional do RedisORM")** - Veja a documentação detalhada com exemplos e conceitos.
+  * **[Principais dependências](#principais-dependências "As principais dependências.")** - Dependências principais e que o **RedisOKM** não funciona sem.
+  * **[Dependências para testes](#dependências-para-testes "Dependências usadas em testes.")** - Dependências usadas para testar o **RedisOKM**
+* **[Exemplo de uso](#exemplo-de-uso)** - Demonstração prática do **RedisOKM** com boas práticas.
+* **[Docs](#docs "Veja a documentação adicional do RedisOKM")** - Veja a documentação detalhada com exemplos e conceitos.
 
 ## Instalação
 
-**Clone o repositório do [GitHub](https://github.com/paulindavzl/redis-orm "RedisORM"):**
+**Clone o repositório do [GitHub](https://github.com/paulindavzl/redis-okm "RedisOKM"):**
 
 ```bash
-git clone git@github.com:paulindavzl/redis-orm.git
+git clone git@github.com:paulindavzl/redis-okm.git
 ```
 
-Ou **instale pelo [PyPI](https://pypi.org/project/redis-orm-py/ "RedisORM"):**
+Ou **instale pelo [PyPI](https://pypi.org/project/redis-okm-py/ "RedisOKM"):**
 
 ```bash
-pip install redis-orm
+pip install redis-okm
 ```
 
 ---
 
-## CRUD Básico com RedisORM
+## CRUD Básico com RedisOKM
 
 ### 1. Crie modelos
 
-Um modelo é a representação de uma tabela em um banco de dados. Embora o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")** não funcione com o formato **tabela/coluna** como o  **SQL**, o **RedisORM** se organiza de maneira semelhante a esse formato.
+Um modelo é a representação de uma tabela em um banco de dados. Embora o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")** não funcione com o formato **tabela/coluna** como o  **SQL**, o **RedisOKM** se organiza de maneira semelhante a esse formato.
 
 Modelos devem herdar de **RedisModel:**
 
 ```python
 import datetime as dt 
 
-from redis_orm.tools import RedisModel, RedisConnect
+from redis_okm.tools import RedisModel, RedisConnect
 
 
 class UserModel(RedisModel):
@@ -143,7 +143,7 @@ RedisConnect.delete(
 
 ## Configurações
 
-> ⚠️ Ao iniciar um projeto com  **RedisORM**, um arquivo **JSON** de configuração chamado `redis_configure.json` será gerado automaticamente na raiz do projeto.
+> ⚠️ Ao iniciar um projeto com  **RedisOKM**, um arquivo **JSON** de configuração chamado `redis_configure.json` será gerado automaticamente na raiz do projeto.
 
 ```json
 {
@@ -185,7 +185,7 @@ Este arquivo contém todas as informações necessárias para que o **[Redis](ht
 Você  **não precisa editar o JSON manualmente**! Use a classe **[Settings](#settings "Veja mais sobre Settings")** para modificar ou acessar as configurações:
 
 ```python
-from redis_orm.tools import Settings, RedisModel
+from redis_okm.tools import Settings, RedisModel
 
 
 # instancie Settings
@@ -209,7 +209,7 @@ class UserModel(RedisModel):
 
 
 # você também pode modificar a instância padrão
-from redis_orm.tools import settings # todas as alterações afetarão os modelos que usam a instância padrão
+from redis_okm.tools import settings # todas as alterações afetarão os modelos que usam a instância padrão
 ```
 
 **Settings** também tem suporte a variáveis de ambiente. Veja mais em  **[Settings](#settings)** .
@@ -218,11 +218,11 @@ from redis_orm.tools import settings # todas as alterações afetarão os modelo
 
 ## Dependências
 
-O **RedisORM** utiliza algumas bibliotecas específicas para funcionar corretamente. Embora nem todas exijam uma versão fixa, é **recomendado utilizar as mesmas versões** adotadas no desenvolvimento para evitar incompatibilidades.
+O **RedisOKM** utiliza algumas bibliotecas específicas para funcionar corretamente. Embora nem todas exijam uma versão fixa, é **recomendado utilizar as mesmas versões** adotadas no desenvolvimento para evitar incompatibilidades.
 
 ### Principais dependências
 
-- **[Python 3.13.x](https://www.python.org/downloads/release/python-3130/)** - Linguagem usada no desenvolvimento do RedisORM. Ainda **não há suporte para Python 3.14 ou superior**.
+- **[Python 3.13.x](https://www.python.org/downloads/release/python-3130/)** - Linguagem usada no desenvolvimento do RedisOKM. Ainda **não há suporte para Python 3.14 ou superior**.
 - **[poetry 2.1.1](https://pypi.org/project/poetry/2.1.1/)** - Gerenciador de dependências utilizado pelo projeto. Não possui restrições de versão, mas é ideal manter esta.
 - **[redis-py 5.2.1](https://pypi.org/project/redis/5.2.1/)** - Cliente oficial para conexão com servidores Redis.
 - **[python-dotenv 1.1.0](https://pypi.org/project/python-dotenv/1.1.0/)** - Carrega variáveis de ambiente a partir de arquivos `.env`.
@@ -231,9 +231,9 @@ O **RedisORM** utiliza algumas bibliotecas específicas para funcionar corretame
 
 * **[pytest 8.3.5](https://pypi.org/project/pytest/8.3.5/)** - Framework de testes automatizados. Opcional — não é necessário para o uso da biblioteca.
 
-- **[fakeredis 2.28.1](https://pypi.org/project/fakeredis/2.28.1/)** - Emula o Redis em memória para testes sem um servidor real. Embora usado somente para fins de testes, não é possível (nem recomendado) instalar o **RedisORM** sem ele.
+- **[fakeredis 2.28.1](https://pypi.org/project/fakeredis/2.28.1/)** - Emula o Redis em memória para testes sem um servidor real. Embora usado somente para fins de testes, não é possível (nem recomendado) instalar o **RedisOKM** sem ele.
 
-> ⚠️ **Recomendação**: embora o RedisORM não bloqueie versões mais recentes, mantenha as versões acima sempre que possível para evitar comportamentos inesperados.
+> ⚠️ **Recomendação**: embora o RedisOKM não bloqueie versões mais recentes, mantenha as versões acima sempre que possível para evitar comportamentos inesperados.
 
 ---
 
@@ -242,8 +242,8 @@ O **RedisORM** utiliza algumas bibliotecas específicas para funcionar corretame
 ```python
 import datetime as dt # somente para exemplo (não obrigatório)
 
-from redis_orm.tools import RedisModel, Settings, RedisConnect
-from redis_orm.exceptions import RedisConnectionAlreadyRegisteredException, RedisConnectNoRecordsException
+from redis_okm.tools import RedisModel, Settings, RedisConnect
+from redis_okm.exceptions import RedisConnectionAlreadyRegisteredException, RedisConnectNoRecordsException
 
 
 # instância de Settings
@@ -269,7 +269,7 @@ settings.set_config(
 
 # modelo de Usuário
 class UserModel(RedisModel):
-    __settings__ = settings # informo a instância da configuração usada (se não informada, usa uma padrão - from redis_orm.tools import settings)
+    __settings__ = settings # informo a instância da configuração usada (se não informada, usa uma padrão - from redis_okm.tools import settings)
     __db__ = "user" # informo o banco de dados nomeado (não é obrigatório estar nomeado, pode ser "__db__ = 0")
     __tablename__ = "users" # nome da "tabela" (caso não informado será o nome da classe do modelo: "usermodel")
     __idname__ = "uid" # informo o identificador do modelo (se não informado será o primeiro parâmetro)
@@ -305,8 +305,8 @@ class UserModelRepository:
             response["message"] = "This user already has a registration."
         # se o erro não for "RedisConnectionAlreadyRegisteredException"
         except Exception as e: 
-            # verifica se é um erro de conexão do RedisORM (os erros de conexão possuem o parâmetro "__redisorm__")
-            if getattr(e, "__redisorm__", False):
+            # verifica se é um erro de conexão do RedisOKM (os erros de conexão possuem o parâmetro "__RedisOKM__")
+            if getattr(e, "__RedisOKM__", False):
                 response["result"] = "err"
                 response["cause"] = "connection_error"
                 response["message"] = "An internal error occurred connecting to the Redis server."
@@ -325,8 +325,8 @@ class UserModelRepository:
         try:
             RedisConnect.add(user, exists_ok=True) # exists_ok permite atualizar o usuário caso ele já possua registro
             response["result"] = "success"
-        except Exception as e: # o único erro interno do RedisORM que pode ocorrer é o de conexão (se exists_ok=True e se a validação do usuário for bem feita)
-            if getattr(e, "__redisorm__", False):
+        except Exception as e: # o único erro interno do RedisOKM que pode ocorrer é o de conexão (se exists_ok=True e se a validação do usuário for bem feita)
+            if getattr(e, "__RedisOKM__", False):
                 response["result"] = "err"
                 response["cause"] = "connection_error"
                 response["message"] = "An internal error occurred connecting to the Redis server."
@@ -345,8 +345,8 @@ class UserModelRepository:
         try:
             user = RedisConnect.get(UserModel).filter_by(uid=uid)
             return user
-        except Exception as e: # o único erro interno do RedisORM que pode ocorrer é o de conexão
-            if getattr(e, "__redisorm__", False):
+        except Exception as e: # o único erro interno do RedisOKM que pode ocorrer é o de conexão
+            if getattr(e, "__RedisOKM__", False):
                 response["result"] = "err"
                 response["cause"] = "connection_error"
                 response["message"] = "An internal error occurred connecting to the Redis server."
@@ -363,8 +363,8 @@ class UserModelRepository:
         try:
             users = RedisConnect.get(UserModel).list
             return users
-        except Exception as e: # o único erro interno do RedisORM que pode ocorrer é o de conexão
-            if getattr(e, "__redisorm__", False):
+        except Exception as e: # o único erro interno do RedisOKM que pode ocorrer é o de conexão
+            if getattr(e, "__RedisOKM__", False):
                 response["result"] = "err"
                 response["cause"] = "connection_error"
                 response["message"] = "An internal error occurred connecting to the Redis server."
@@ -388,7 +388,7 @@ class UserModelRepository:
             response["cause"] = "no_records"
             response["message"] = "The UID provided has no record."
         except Exception as e: 
-            if getattr(e, "__redisorm__", False):
+            if getattr(e, "__RedisOKM__", False):
                 response["result"] = "err"
                 response["cause"] = "connection_error"
                 response["message"] = "An internal error occurred connecting to the Redis server."
@@ -420,8 +420,8 @@ class UserModelRepository:
 
 ### Exceptions
 
-O **RedisORM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./docs/Exceptions.md "Veja mais sobre Exceptions")**.
+O **RedisOKM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./docs/Exceptions.md "Veja mais sobre Exceptions")**.
 
 ### Licença
 
-**RedisORM** é distribuído sob a Licença MIT. Veja o arquivo **[LICENSE](./docs/LICENSE "LICENÇA de uso")** para mais detalhes.
+**RedisOKM** é distribuído sob a Licença MIT. Veja o arquivo **[LICENSE](./docs/LICENSE "LICENÇA de uso")** para mais detalhes.

@@ -1,4 +1,4 @@
-from redis_orm import Settings
+from redis_okm import Settings
 
 
 # verifica se Settings está iniciando corretamente

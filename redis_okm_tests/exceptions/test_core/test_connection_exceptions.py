@@ -2,10 +2,10 @@ import os
 import re
 import pytest
 
-from redis_orm.core.connection import RedisConnect
-from redis_orm.exceptions.connection_exceptions import *
+from redis_okm.core.connection import RedisConnect
+from redis_okm.exceptions.connection_exceptions import *
 
-from redis_orm_tests.conftest import TestModel, Settings
+from redis_okm_tests.conftest import TestModel, Settings
 
 
 def test__exceptions__redis_connect__settings_instance_exception():

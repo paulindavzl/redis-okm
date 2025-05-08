@@ -1,11 +1,12 @@
 # RedisOKM
 
-Uma **OKM** _simples_ e _poderosa_ que facilita a conexão e manipulação do banco de dados do **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
+Uma **[OKM](#o-que-é-okm "Veja o que significa OKM")** _simples_ e _poderosa_ que facilita a conexão e manipulação do banco de dados do **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
 
 ## Sumário
 
+* **[O que é OKM](#o-que-é-okm "Veja o que significa OKM")** - Veja o que significa **OKM** e o motivo da biblioteca se chamar **RedisOKM**.
 * **[Instalação](#instalação "Guia de instalação")** - Passo a passo de como instalar o **RedisOKM**.
-* **[CRUD Básico com RedisOKM](#crud-básico-com-RedisOKM "Guia de como realizar um CRUD simples com RedisOKM")** - Como fazer operações básicas com **RedisOKM**.
+* **[CRUD Básico com RedisOKM](#crud-básico-com-redisokm "Guia de como realizar um CRUD simples com RedisOKM")** - Como fazer operações básicas com **RedisOKM**.
 
   * **[1. Crie modelos](#1-crie-modelos "Guia de como criar modelos")** - Aprenda a criar os modelos  usados no **RedisOKM**.
   * **[2. Adicione ou atualize registros no banco de dados](#2-adicione-ou-atualize-registros-no-banco-de-dados "Veja como adicionar ou atualizar registros no banco de dados Redis")** - Veja como adicionar ou atualizar registros com **RedisOKM**.
@@ -19,12 +20,17 @@ Uma **OKM** _simples_ e _poderosa_ que facilita a conexão e manipulação do ba
 * **[Exemplo de uso](#exemplo-de-uso)** - Demonstração prática do **RedisOKM** com boas práticas.
 * **[Docs](#docs "Veja a documentação adicional do RedisOKM")** - Veja a documentação detalhada com exemplos e conceitos.
 
+## O que é OKM
+
+**OKM** significa **Object-Key Mapper**, ou _Mapeador de chaves de Objetos_. A biblioteca recebe este nome pelo fato que usar chaves para relacionar um objeto no banco de dados do **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
+
 ## Instalação
 
-**Clone o repositório do [GitHub](https://github.com/paulindavzl/redis-okm "RedisOKM"):**
+**Clone o repositório do [GitHub](https://github.com/paulindavzl/redis-okm "RedisOKM") e instale usando o Poetry:**
 
 ```bash
 git clone git@github.com:paulindavzl/redis-okm.git
+poetry install
 ```
 
 Ou **instale pelo [PyPI](https://pypi.org/project/redis-okm-py/ "RedisOKM"):**
@@ -95,10 +101,10 @@ RedisConnect.add(model=user, exists_ok=True) # isso atualizará o registro (caso
 ...
 
 # use RedisConnect.get(...) para obter registros
-models = RedisConnect.get(model=UserModel) # caso exista mais de um registro deste modelo, uma classe Getter será retornada. Caso exista somente um registro, o modelo dele será retornado. Se não existir nenhum registro, o retorno será None
+models = RedisConnect.get(model=UserModel) # este método retorna Getter
 
 
-# caso o retorno de RedisConnect.get(...) seja Getter, existem alguns métodos para realizar consultas específicas
+# Getter possui métodos para realizar consultas específicas
 model_uid_1 = models.filter_by(uid=1) # retorna um registro de ID 1. Caso o parâmetro usado para filtrar retorne mais de um registro, outro Getter será retornado
 first_model = models.first() # retorna o primeiro registro obtido
 last_model = models.last() # retorna o último registro obtido
@@ -108,13 +114,7 @@ length = models.length # retorna a quantidade de registros (int) retornados
 
 ```
 
-**Obs: O retorno de RedisConnect.get pode ser:**
-
-```python
-RedisConnect.get(...) -> None # Caso não exista nenhum registro daquele modelo
-RedisConnect.get(...) -> UserModel # Caso só exista um registro daquele modelo (UserModel é exemplo, pode ser qualquer modelo)
-RedisConnect.get(...) -> Getter # Caso exista mais de um registro daquele modelo (Getter possui métodos tipo: filter_by, first, ...)
-```
+Veja mais sobre a classe **[Getter](#getter "Veja mais sobre  Getter").**
 
 ### 4. Apague um ou mais registros do banco de dados
 
@@ -243,7 +243,7 @@ O **RedisOKM** utiliza algumas bibliotecas específicas para funcionar corretame
 import datetime as dt # somente para exemplo (não obrigatório)
 
 from redis_okm.tools import RedisModel, Settings, RedisConnect
-from redis_okm.exceptions import RedisConnectionAlreadyRegisteredException, RedisConnectNoRecordsException
+from redis_okm.exceptions import RedisConnectionAlreadyRegisteredException, RedisConnectNoRecordsException, RedisConnectConnectionFailedException
 
 
 # instância de Settings
@@ -303,15 +303,12 @@ class UserModelRepository:
             response["result"] = "err"
             response["cause"] = "already_registered"
             response["message"] = "This user already has a registration."
-        # se o erro não for "RedisConnectionAlreadyRegisteredException"
-        except Exception as e: 
-            # verifica se é um erro de conexão do RedisOKM (os erros de conexão possuem o parâmetro "__RedisOKM__")
-            if getattr(e, "__RedisOKM__", False):
-                response["result"] = "err"
-                response["cause"] = "connection_error"
-                response["message"] = "An internal error occurred connecting to the Redis server."
-            else:
-                ... # trata o erro
+        except RedisConnectConnectionFailedException: # erro de conexão do RedisOKM
+            response["result"] = "err"
+            response["cause"] = "connection_error"
+            response["message"] = "An internal error occurred connecting to the Redis server."
+        except Exception as e:
+            ... # trata o erro
 
         return response # retorna a resposta para o usuário
   
@@ -325,13 +322,12 @@ class UserModelRepository:
         try:
             RedisConnect.add(user, exists_ok=True) # exists_ok permite atualizar o usuário caso ele já possua registro
             response["result"] = "success"
-        except Exception as e: # o único erro interno do RedisOKM que pode ocorrer é o de conexão (se exists_ok=True e se a validação do usuário for bem feita)
-            if getattr(e, "__RedisOKM__", False):
-                response["result"] = "err"
-                response["cause"] = "connection_error"
-                response["message"] = "An internal error occurred connecting to the Redis server."
-            else:
-                ... # trata o erro
+        except RedisConnectConnectionFailedException: # erro de conexão do RedisOKM
+            response["result"] = "err"
+            response["cause"] = "connection_error"
+            response["message"] = "An internal error occurred connecting to the Redis server."
+        except Exception as e:
+            ... # trata o erro
 
         return response # retorna a resposta para o usuário
   
@@ -345,13 +341,12 @@ class UserModelRepository:
         try:
             user = RedisConnect.get(UserModel).filter_by(uid=uid)
             return user
-        except Exception as e: # o único erro interno do RedisOKM que pode ocorrer é o de conexão
-            if getattr(e, "__RedisOKM__", False):
-                response["result"] = "err"
-                response["cause"] = "connection_error"
-                response["message"] = "An internal error occurred connecting to the Redis server."
-            else:
-                ... # trata o erro
+        except RedisConnectConnectionFailedException: # erro de conexão do RedisOKM
+            response["result"] = "err"
+            response["cause"] = "connection_error"
+            response["message"] = "An internal error occurred connecting to the Redis server."
+        except Exception as e:
+            ... # trata o erro
 
         return response
   
@@ -363,13 +358,12 @@ class UserModelRepository:
         try:
             users = RedisConnect.get(UserModel).list
             return users
-        except Exception as e: # o único erro interno do RedisOKM que pode ocorrer é o de conexão
-            if getattr(e, "__RedisOKM__", False):
-                response["result"] = "err"
-                response["cause"] = "connection_error"
-                response["message"] = "An internal error occurred connecting to the Redis server."
-            else:
-                ... # trata o erro
+        except RedisConnectConnectionFailedException: # erro de conexão do RedisOKM
+            response["result"] = "err"
+            response["cause"] = "connection_error"
+            response["message"] = "An internal error occurred connecting to the Redis server."
+        except Exception as e:
+            ... # trata o erro
 
         return response
   
@@ -387,15 +381,15 @@ class UserModelRepository:
             response["result"] = "err"
             response["cause"] = "no_records"
             response["message"] = "The UID provided has no record."
-        except Exception as e: 
-            if getattr(e, "__RedisOKM__", False):
-                response["result"] = "err"
-                response["cause"] = "connection_error"
-                response["message"] = "An internal error occurred connecting to the Redis server."
-            else:
-                ... # trata o erro
+        except RedisConnectConnectionFailedException: # erro de conexão do RedisOKM
+            response["result"] = "err"
+            response["cause"] = "connection_error"
+            response["message"] = "An internal error occurred connecting to the Redis server."
+        except Exception as e:
+            ... # trata o erro
 
         return response
+
 
 
 ```

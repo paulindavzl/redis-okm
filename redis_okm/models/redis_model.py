@@ -8,7 +8,7 @@ class RedisModel:
     """
     Base para todos os modelos em RedisOKM
     """
-    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "to_dict"]
+    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict"]
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -44,6 +44,7 @@ class RedisModel:
         testing = getattr(self, "__testing__", False)
         tablename = getattr(self, "__tablename__", None)
         sett = getattr(self, "__settings__", settings)
+        expire = getattr(self, "__expire__", None)
 
         if db is None:
             raise RedisModelDBException("Specify the database using __db__ when structuring the model")
@@ -56,7 +57,7 @@ class RedisModel:
                     break
         if not tablename:
             tablename = type(self).__name__.lower()
-
+            
         # repassa a informações para o modelo (exceção de __db__ que é obrigatório)
         self.__db__ = db
         self.__settings__ = sett
@@ -65,6 +66,7 @@ class RedisModel:
         self.__autoid__ = autoid
         self.__hashid__ = hashid
         self.__idname__ = idname
+        self.__expire__ = expire
 
         if not attributes.get("instance") is False:
             attrs = {}
@@ -84,7 +86,7 @@ class RedisModel:
                     raise RedisModelTypeValueException(f"{attr} expected a possible {typ.__name__} value, but received a {type(received).__name__} ({received}) value!")
 
             if autoid:
-                attrs[idname] = RedisConnect.count # ID será gerado somente na hora de adicionar no banco de dados
+                attrs[idname] = RedisConnect.get # ID será gerado somente na hora de adicionar no banco de dados
             for attr, value in attrs.items():
                 setattr(self, attr, value)
 

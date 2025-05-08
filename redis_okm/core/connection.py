@@ -4,8 +4,6 @@ import hashlib
 import fakeredis
 from typing import Any
 
-import redis.exceptions
-
 from ..core import _model
 from .configure import Settings
 from ..models.getter_model import Getter
@@ -106,7 +104,7 @@ class RedisConnect:
         idname = model.__idname__
         identify = getattr(model, idname)
         if callable(identify):
-            identify = hashlib.md5(str(identify(model.__class__)).encode("utf-8")).hexdigest() if model.__hashid__ else identify(model.__class__)
+            identify = hashlib.md5(str(identify(model.__class__).length).encode("utf-8")).hexdigest() if model.__hashid__ else identify(model.__class__).length
             setattr(model, idname, identify)
             model.to_dict[idname] = identify
         name = RedisConnect._get_name(model)
@@ -115,6 +113,15 @@ class RedisConnect:
         if RedisConnect.exists(model) and not exists_ok:
             raise RedisConnectionAlreadyRegisteredException(f"This {idname} ({identify}) already exists in the database!")
         redis_handler.hset(name, mapping=model.to_dict)
+        
+        # verifica se tem expiração
+        expire = getattr(model, "__expire__")
+        if expire:
+            try:
+                expire = float(expire)
+                redis_handler.expire(name, expire)
+            except ValueError:
+                raise RedisConnectInvalidExpireException(f'expire must be convertible to float! expire: "{expire}"')
 
 
     @staticmethod
@@ -156,7 +163,7 @@ class RedisConnect:
     
 
     @staticmethod
-    def get(model: _model) -> None|_model|Getter:
+    def get(model: _model) -> Getter:
         """
         Obtém dados do banco de dados baseado em modelos
 
@@ -187,11 +194,7 @@ class RedisConnect:
             new_model = model.__class__(**resp)
             getters.append(new_model)
 
-        if len(getters) == 1:
-            return getters[0]
-        elif len(getters) > 1:
-            return Getter(getters)
-        return None
+        return Getter(getters)
     
 
     @staticmethod
@@ -257,27 +260,28 @@ class RedisConnect:
 
 
     @staticmethod
-    def count(model: _model) -> int:
+    def count(db: int|str, settings: Settings, testing: bool=False) -> int:
         """
-        Retorna a quantidade de registros de um banco de dados
+        Retorna a quantidade de registros de um banco de dados completo, sejam eles do mesmo modelo ou não
 
         Params:
 
-            model - modelo que usa RedisModel
+            db (int|str) - índice do banco de dados
+            settings (Settings) - configurações para a conexão
+            testing (bool) - informa se é um teste
 
         Examples:
-
-            class UserModel(RedisModel):
-                ...
-
             
-            count = RedisConnect.count(UserModel)
+            count = RedisConnect.count(db="tests", settings=settings)
 
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
-        if callable(model):
-            model = RedisConnect._get_instance(model)
-        redis_handler = RedisConnect._connect(model)
+        if isinstance(db, str):
+            if not isinstance(settings, Settings):
+                raise RedisConnectionSettingsInstanceException("For a named db enter an instance of Settings!")
+            db = settings.get_db(db)
+        
+        redis_handler = RedisConnect._connect(use_model=False, settings=settings, db=db, testing=testing)
         count = redis_handler.dbsize()
         return count
     
@@ -313,14 +317,23 @@ class RedisConnect:
 
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
+
+        def restart(index):
+            redis_handler = RedisConnect._connect(use_model=False, db=index, settings=settings)
+            redis_handler.flushall()
         
         if db == "__all__":
             for i in range(16):
-                redis_handler = RedisConnect._connect(use_model=False, db=i, settings=settings)
-                redis_handler.flushall()
+                try:
+                    restart(i)
+                except:
+                    pass
         else:
-            redis_handler = RedisConnect._connect(use_model=False, db=db, settings=settings)
-            redis_handler.flushall()
+            if isinstance(db, list):
+                for i in db:
+                    restart(i)
+            else:
+                restart(db)
 
 
 

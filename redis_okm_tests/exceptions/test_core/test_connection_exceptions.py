@@ -1,6 +1,6 @@
 import os
 import re
-import pytest
+import pytest 
 
 from redis_okm.core.connection import RedisConnect
 from redis_okm.exceptions.connection_exceptions import *
@@ -9,10 +9,14 @@ from redis_okm_tests.conftest import TestModel, Settings
 
 
 def test__exceptions__redis_connect__settings_instance_exception():
-    expected = re.escape("settings must be an instance of Settings! senttings_handler: str")
+    expected1 = re.escape("settings must be an instance of Settings! senttings_handler: str")
 
-    with pytest.raises(RedisConnectionSettingsInstanceException, match=expected):
+    with pytest.raises(RedisConnectionSettingsInstanceException, match=expected1):
         RedisConnect._connect(use_model=False, settings="settings")
+
+    expected2 = re.escape("For a named db enter an instance of Settings!")
+    with pytest.raises(RedisConnectionSettingsInstanceException, match=expected2):
+        RedisConnect.count("tests", "")
 
 
 def test__exceptions__redis_connect__connection_failed_exception():
@@ -45,16 +49,14 @@ def test__exceptions__redis_connect__already_registered_exception():
 
 
 def test__exceptions__redis_connect__no_identifier_exception():
-    expected = re.escape("Use an instance of the model (TestModel) or provide an identifier.")
+    expected1 = re.escape("Use an instance of the model (TestModel) or provide an identifier.")
 
-    with pytest.raises(RedisConnectNoIdentifierException, match=expected):
+    with pytest.raises(RedisConnectNoIdentifierException, match=expected1):
         RedisConnect.exists(TestModel)
 
+    expected2 = re.escape("Use an instance of the model (TestModel) or provide an identifier.")
 
-def test__exceptions__redis_connect__no_identifier_exception():
-    expected = re.escape("Use an instance of the model (TestModel) or provide an identifier.")
-
-    with pytest.raises(RedisConnectNoIdentifierException, match=expected):
+    with pytest.raises(RedisConnectNoIdentifierException, match=expected2):
         RedisConnect.delete(TestModel)
 
 
@@ -64,3 +66,12 @@ def test__exceptions__redis_connect__no_records_exception():
 
     with pytest.raises(RedisConnectNoRecordsException, match=expected):
         RedisConnect.delete(model)
+
+
+def test__exceptions__redis_connect__invalid_expire_exception():
+    model = TestModel(attr1="test", attr2=0, attr3=0)
+    model.__expire__ = "test"
+    expected = re.escape('expire must be convertible to float! expire: "test"')
+
+    with pytest.raises(RedisConnectInvalidExpireException, match=expected):
+        RedisConnect.add(model)

@@ -25,9 +25,13 @@ def test__exceptions__redis_model__attribute_exception():
         attr1: str
         attr2: int
 
-    expected = re.escape('TestModel does not have "attr3" attribute!')
-    with pytest.raises(RedisModelAttributeException, match=expected):
+    expected1 = re.escape('TestModel does not have "attr3" attribute!')
+    with pytest.raises(RedisModelAttributeException, match=expected1):
         TestModel(attr3="error")
+
+    expected2 = re.escape('"__db__" is an internal attribute and cannot be set')
+    with pytest.raises(RedisModelAttributeException, match=expected2):
+        TestModel(__db__="tests")
 
 
 def test__exceptions__redis_model__type_value_exception():

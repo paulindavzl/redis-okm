@@ -48,7 +48,8 @@ class Getter:
                 if param not in getattr(model, "__annotations__", {}):
                     raise GetterAttributeException(f"{type(model).__name__} does not have {param} attribute!")
                 
-                if getattr(model, param) != condition:
+                item = getattr(model, param)
+                if item != type(item)(condition):
                     is_valid = False
                 
             if is_valid:

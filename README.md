@@ -404,6 +404,10 @@ class UserModelRepository:
 
 **RedisConnect** é a classe que se conecta de fato com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**. Veja mais sobre ela em **[RedisConnect](./docs/RedisConnect.md "Veja mais sobre RedisConnect")**.
 
+### RedisModel
+
+Responsável por estruturar um modelo por completo. Veja mais sobre ela em **[RedisModel](./docs/RedisModel.md "Veja mais sobre RedisModel")**.
+
 ### Settings
 
 **Settings** é a classe usada para configurar e obter configurações gerais sobre conexões e outras. Veja mais sobre ela em **[Settings](./docs/Settings.md "Veja mais sobre Settings")**.

@@ -20,3 +20,9 @@ class RedisModelNoValueException(AttributeError):
     """
     The attribute did not receive any value.
     """
+
+
+class RedisModelForeignKeyException(ValueError):
+    """
+    Foreign key without record!
+    """

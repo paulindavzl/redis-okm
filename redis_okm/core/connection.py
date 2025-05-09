@@ -1,4 +1,5 @@
 import time
+import json
 import redis
 import hashlib
 import fakeredis
@@ -34,7 +35,8 @@ class RedisConnect:
             if not isinstance(settings, Settings):
                 raise RedisConnectionSettingsInstanceException(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
             
-            is_testing = getattr(settings, "testing", False)
+            is_testing = getattr(settings, "testing", False) if not kwargs.get("testing") else kwargs.get("testing")
+            
 
             if isinstance(db, str):
                 db = settings.get_db(db)
@@ -69,7 +71,7 @@ class RedisConnect:
 
 
     @staticmethod
-    def add(model: _model, exists_ok: bool=False):
+    def add(model: _model, exists_ok: bool=False, check_fk: bool=True):
         """
         Adiciona um novo registro no banco de dados.
 
@@ -102,17 +104,27 @@ class RedisConnect:
             raise RedisConnectionModelInstanceException("The model must be instantiated to be added to the database!")
 
         idname = model.__idname__
-        identify = getattr(model, idname)
-        if callable(identify):
-            identify = hashlib.md5(str(identify(model.__class__).length).encode("utf-8")).hexdigest() if model.__hashid__ else identify(model.__class__).length
-            setattr(model, idname, identify)
-            model.to_dict[idname] = identify
+        for item in model.__callable__:
+            value = getattr(model, item)
+            if item == idname:
+                value = hashlib.md5(str(value(model.__class__).length).encode("utf-8")).hexdigest() if model.__hashid__ else value(model.__class__).length
+            else:
+                value = str(value() if callable(value) else value)
+            setattr(model, item, value)
+            model.to_dict[item] = str(value)
+
         name = RedisConnect._get_name(model)
- 
         redis_handler = RedisConnect._connect(model)
+
         if RedisConnect.exists(model) and not exists_ok:
-            raise RedisConnectionAlreadyRegisteredException(f"This {idname} ({identify}) already exists in the database!")
-        redis_handler.hset(name, mapping=model.to_dict)
+            raise RedisConnectionAlreadyRegisteredException(f"This {idname} ({model.to_dict[idname]}) already exists in the database!")
+        fk_models = model.__fk_models__
+        if check_fk and fk_models:
+            RedisConnect._set_foreign_key(fk_models, name, model.__fk__, type(model).__name__, getattr(model, idname), getattr(model, "__db__"))
+
+        mapping = model.to_dict
+        mapping["__fks__"] = json.dumps(model.__fks__)
+        redis_handler.hset(name, mapping=mapping)
         
         # verifica se tem expiração
         expire = getattr(model, "__expire__")
@@ -122,10 +134,29 @@ class RedisConnect:
                 redis_handler.expire(name, expire)
             except ValueError:
                 raise RedisConnectInvalidExpireException(f'expire must be convertible to float! expire: "{expire}"')
+            
+
+    @staticmethod
+    def _set_foreign_key(models: dict[str], name: str, actions: str, model_name: str, mid: any, db: int|str):
+        for fk, value in models.items():
+            model = value["model"]
+            id = value["id"]
+
+            getter = RedisConnect.get(model)
+            if getter.length > 1:
+                f_model = getter.first()
+                fil = {f_model.__idname__:id}
+                model_data = getter.filter_by(**fil)
+            else:
+                model_data = getter.first()
+            
+            fks = {"key": name, "action": actions[fk], "model": model_name, "id": mid, "db": db}
+            model_data.__fks__.append(fks)
+            RedisConnect.add(model_data, True, False)
 
 
     @staticmethod
-    def exists(model: _model, identify: Any=None) -> bool:
+    def exists(model: _model=None, identify: Any=None, key: str=None) -> bool:
         """
         Verifica se um modelo já existe no banco de dados
 
@@ -148,7 +179,7 @@ class RedisConnect:
         
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
-        if not model.__instancied__ and identify is None:
+        if not model.__instancied__ and identify is None and not key:
             raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
 
         if model.__instancied__ and identify is None:
@@ -158,7 +189,7 @@ class RedisConnect:
             model = model(instance=False, identify=identify)
 
         redis_handler = RedisConnect._connect(model)
-        name = RedisConnect._get_name(model)
+        name = RedisConnect._get_name(model) if not key else key
         return redis_handler.exists(name) == 1
     
 
@@ -191,7 +222,9 @@ class RedisConnect:
         getters = []
         for name in redis_handler.scan_iter(pattern):
             resp = redis_handler.hgetall(name)
-            new_model = model.__class__(**resp)
+            fks = json.loads(resp.pop("__fks__"))
+            new_model = model.__class__(set_id=True, **resp)
+            new_model.__fks__ = fks
             getters.append(new_model)
 
         return Getter(getters)
@@ -238,12 +271,30 @@ class RedisConnect:
             model = model.__class__
         
         def _delete(delete_model: _model):
+            idname = delete_model.__idname__
             if not non_existent_ok and not RedisConnect.exists(delete_model):
-                idname = delete_model.__idname__
                 raise RedisConnectNoRecordsException(f"This {idname} ({getattr(delete_model, idname)}) does not exist in the database!")
             
             name = RedisConnect._get_name(delete_model)
             redis_handler = RedisConnect._connect(delete_model)
+
+            fil = {idname:getattr(delete_model, idname)}
+            fk = RedisConnect.get(model).filter_by(**fil)
+            fks = fk.__fks__
+            for fk in fks:
+                if RedisConnect.exists(del_model, key=fk["key"]):
+                    action = fk["action"]
+                    if action == "restrict": 
+                        raise RedisConnectForeignKeyException(f"Could not delete {type(delete_model).__name__} model record because it is a restricted reference in {fk["model"]}'s foreign key ({fk["model"]} - id: {fk["id"]})")
+                    elif action == "cascade":
+                        sett = delete_model.__settings__
+                        testing = model.__testing__
+                        db = fk["db"]
+                        fk_handler = RedisConnect._connect(use_model=False, settings=sett, testing=testing, db=db)
+                        fk_handler.delete(fk["key"])
+                    else:
+                        raise RedisConnectForeignKeyException(f'The "{action}" action is not valid! Try "cascade" or "restrict".')
+            
             redis_handler.delete(name)
         
         if isinstance(identify, list):

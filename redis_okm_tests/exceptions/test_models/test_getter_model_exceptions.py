@@ -95,3 +95,10 @@ def test__exceptions__getter__last__attribute_exception(getter: Getter):
 
     with pytest.raises(GetterAttributeException, match=expected):
         getter.last("invalid_attr")
+
+
+def test__exceptions__getter__filter_by__condition_type_exception(getter: Getter):
+    expected = re.escape('The "attr3" condition must be a possible float. attr3: "test_error" (str)')
+
+    with pytest.raises(GetterConditionTypeException, match=expected):
+        getter.filter_by(attr3="test_error")

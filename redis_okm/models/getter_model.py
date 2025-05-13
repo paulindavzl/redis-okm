@@ -43,16 +43,17 @@ class Getter:
         """
         models = []
         for model in self._getters:
-            is_valid = True
             for param, condition in conditions.items():
                 if param not in getattr(model, "__annotations__", {}):
                     raise GetterAttributeException(f"{type(model).__name__} does not have {param} attribute!")
                 
-                if getattr(model, param) != condition:
-                    is_valid = False
-                
-            if is_valid:
-                models.append(model)
+                attr = getattr(model, param)
+                typ: type = type(attr)
+                try:
+                    if attr == typ(condition):
+                        models.append(model)
+                except ValueError:
+                    raise GetterConditionTypeException(f'The "{param}" condition must be a possible {typ.__name__}. {param}: {condition} {type(condition).__name__}')
 
         if len(models) == 1:
             return models[0]

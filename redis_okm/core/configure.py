@@ -25,11 +25,12 @@ class Settings:
     password: str
     decode_response: str
     timeout: float
-    retry_on_timeout: list[bool]
+    retry_on_timeout: str|list[bool]
     max_connections: int
     blocking_timeout: int
     separator: str
     prefix: str
+    hash_algorithm: str
 
 
     def __init__(self, path: str="redis_configure.json"):
@@ -156,7 +157,8 @@ class Settings:
             },
             "structure": {
                 "separator": ":",
-                "prefix": "cwd"
+                "prefix": "cwd",
+                "hash_algorithm": "md5"
             },
             "dbnames": {
                 "tests": 15

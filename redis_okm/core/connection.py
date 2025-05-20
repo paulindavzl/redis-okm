@@ -1,4 +1,5 @@
 import time
+import json
 import redis
 import hashlib
 import fakeredis
@@ -24,7 +25,7 @@ class RedisConnect:
             settings = model.__settings__
 
             if not isinstance(settings, Settings):
-                raise RedisConnectionSettingsInstanceException(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
+                raise RedisConnectionSettingsInstanceException(f"{model.__name__}: settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
             
             is_testing = getattr(model, "__testing__", False)
         else:
@@ -32,7 +33,7 @@ class RedisConnect:
             settings = kwargs.get("settings")
 
             if not isinstance(settings, Settings):
-                raise RedisConnectionSettingsInstanceException(f"settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
+                raise RedisConnectionSettingsInstanceException(f"{f"{model.__name__}: " if use_model else ""}settings must be an instance of Settings! senttings_handler: {type(settings).__name__}")
             
             is_testing = getattr(settings, "testing", False)
 
@@ -43,17 +44,17 @@ class RedisConnect:
         tries = int(retry[1]) if isinstance(retry, list) else 1
         for attempts in range(tries):
             try:
-                _redis = fakeredis.FakeRedis(db=db, **settings.redis_info) if is_testing else redis.Redis(db=db, **settings.redis_info)
+                connection = settings.redis_info
+                connection.update({"db": db})
+                _redis = fakeredis.FakeRedis(**connection) if is_testing else redis.Redis(**connection)
                 _redis.ping()
                 return _redis
             except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
                 if attempts < tries - 1:
                     time.sleep(.5)
                     continue
-                raise RedisConnectConnectionFailedException(f"Unable to connect to Redis database: {e.__str__()}")
+                raise RedisConnectConnectionFailedException(f"{f"{model.__name__}: " if use_model else ""}Unable to connect to Redis database: {e.__str__()}")
 
-
-    
 
     @staticmethod
     def _get_name(model: _model, pattern: bool=False) -> str:
@@ -98,30 +99,77 @@ class RedisConnect:
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
 
         """
-        if not model.__instancied__:
-            raise RedisConnectionModelInstanceException("The model must be instantiated to be added to the database!")
+        def _set_identify(algorithm):
+            pos = RedisConnect.get(model, _set_fk=False).length
+            identify = algorithm(str(pos).encode("utf-8")).hexdigest() if model.__hashid__ else pos
 
-        idname = model.__idname__
-        identify = getattr(model, idname)
-        if callable(identify):
-            identify = hashlib.md5(str(identify(model.__class__).length).encode("utf-8")).hexdigest() if model.__hashid__ else identify(model.__class__).length
             setattr(model, idname, identify)
             model.to_dict[idname] = identify
-        name = RedisConnect._get_name(model)
- 
+
+        def _add(handler: redis.Redis, algorithm, set_id: bool=False):
+            if RedisConnect.exists(model) and not exists_ok:
+                if not set_id:
+                    raise RedisConnectionAlreadyRegisteredException(f"{type(model).__name__}: This {idname} ({getattr(model, idname)}) already exists in the database!")
+                else:
+                    _set_identify(algorithm)
+            else:
+                name = RedisConnect._get_name(model)
+                content = model.to_dict
+                fks: dict = model.__foreign_keys__
+                if fks:
+                    model_name = type(model).__name__
+                    for key, value in fks.items():
+                        id = value["id"]
+                        fk_model = value["model"](instance=False, identify=id)
+                        fk_name = RedisConnect._get_name(fk_model)
+                        fk_handler = RedisConnect._connect(fk_model)
+                        fk_settings: Settings = fk_model.__settings__
+                        fk_db = fk_model.__db__
+                        fk_testing = fk_model.__testing__
+                        fk_tablename__ = fk_model.__tablename__
+
+                        fk_data = fk_handler.hgetall(fk_name)
+                        eid = id if isinstance(id, int) else f'"{id}"'
+                        if not fk_data:
+                            raise RedisConnectForeignKeyException(f'{type(model).__name__}: Foreign key "{key}" ({value["model"].__name__}) with ID {eid} has no record!')
+
+                        referenced = fk_data.get("__referenced__")
+                        referenced = json.loads(referenced) if referenced else {}
+                        
+                        referenced[fk_tablename__] = {"key": key, "name": name, "action": model.__action__[key], "connection": fk_settings.redis_info, "db": fk_db, "testing": fk_testing, "model": model_name, "idname": model.__idname__, "id": getattr(model, model.__idname__)}
+
+                        referenced = json.dumps(referenced)
+                        fk_data["__referenced__"] = referenced
+                        
+                        fk_handler.hset(fk_name, mapping=fk_data)
+
+                        content[key] = id
+                                                
+                handler.hset(name, mapping=content)
+
+        if not model.__instancied__:
+            raise RedisConnectionModelInstanceException(f"{model.__name__}: The model must be instantiated to be added to the database!")
+
+        idname = model.__idname__
+        set_id = model.__autoid__ is True and getattr(model, idname) == "__await_autoid__"
+        settings: Settings = model.__settings__
+        algorithm = getattr(hashlib, settings.hash_algorithm)
+
+        if set_id:
+            _set_identify(algorithm)
+
         redis_handler = RedisConnect._connect(model)
-        if RedisConnect.exists(model) and not exists_ok:
-            raise RedisConnectionAlreadyRegisteredException(f"This {idname} ({identify}) already exists in the database!")
-        redis_handler.hset(name, mapping=model.to_dict)
-        
+        _add(redis_handler, algorithm, set_id)
+
         # verifica se tem expiração
         expire = getattr(model, "__expire__")
         if expire:
             try:
+                name = RedisConnect._get_name(model)
                 expire = float(expire)
                 redis_handler.expire(name, expire)
             except ValueError:
-                raise RedisConnectInvalidExpireException(f'expire must be convertible to float! expire: "{expire}"')
+                raise RedisConnectInvalidExpireException(f'{type(model).__name__}: expire must be convertible to float! expire: "{expire}"')
 
 
     @staticmethod
@@ -149,7 +197,7 @@ class RedisConnect:
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         if not model.__instancied__ and identify is None:
-            raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
+            raise RedisConnectNoIdentifierException(f"{model.__name__}: Use an instance of the model or provide an identifier.")
 
         if model.__instancied__ and identify is None:
             identify = getattr(model, model.__idname__)
@@ -163,13 +211,14 @@ class RedisConnect:
     
 
     @staticmethod
-    def get(model: _model) -> Getter:
+    def get(model: _model, _set_fk: bool=True) -> Getter:
         """
         Obtém dados do banco de dados baseado em modelos
 
         Params:
 
             model - modelo que usa RedisModel
+            _set_fk (bool) - indica se é necessário definir chave estrangeira (uso interno)
 
         Examples:
 
@@ -191,7 +240,9 @@ class RedisConnect:
         getters = []
         for name in redis_handler.scan_iter(pattern):
             resp = redis_handler.hgetall(name)
-            new_model = model.__class__(**resp)
+            resp.pop("__referenced__", None)
+
+            new_model = model.__class__(set_fk=_set_fk, **resp)
             getters.append(new_model)
 
         return Getter(getters)
@@ -231,7 +282,7 @@ class RedisConnect:
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
         """
         if not model.__instancied__ and identify is None:
-            raise RedisConnectNoIdentifierException(f"Use an instance of the model ({model.__name__}) or provide an identifier.")
+            raise RedisConnectNoIdentifierException(f"{model.__name__}: Use an instance of the model or provide an identifier.")
 
         if model.__instancied__ and identify is None:
             identify = getattr(model, model.__idname__)
@@ -240,10 +291,39 @@ class RedisConnect:
         def _delete(delete_model: _model):
             if not non_existent_ok and not RedisConnect.exists(delete_model):
                 idname = delete_model.__idname__
-                raise RedisConnectNoRecordsException(f"This {idname} ({getattr(delete_model, idname)}) does not exist in the database!")
-            
+                raise RedisConnectNoRecordsException(f"{type(model).__name__}: This {idname} ({getattr(delete_model, idname)}) does not exist in the database!")
+
             name = RedisConnect._get_name(delete_model)
             redis_handler = RedisConnect._connect(delete_model)
+
+            referenced = redis_handler.hget(name, "__referenced__")
+            if referenced:
+                try:
+                    referenced: dict = json.loads(referenced)
+
+                    for value in referenced.values():
+                        fk_key = value["key"]
+                        fk_name = value["name"]
+                        fk_action = value["action"]
+                        fk_connection = value["connection"]
+                        fk_testing = value["testing"]
+                        fk_model = value["model"]
+                        fk_idname = value["idname"]
+                        fk_id = value["id"]
+
+                        fk_connection.update({"db": value["db"]})
+                        fk_handler = fakeredis.FakeRedis(**fk_connection) if fk_testing else redis.Redis(**fk_connection)
+
+                        if fk_handler.exists(fk_name) == 1:
+                            if fk_action == "restrict":
+                                raise RedisConnectForeignKeyException(f"{type(delete_model).__name__}: It was not possible to delete the model because it is a reference to another record ({fk_model} - {fk_idname}: {fk_id} - {fk_key})!")
+                            elif fk_action == "cascade":
+                                fk_handler.delete(fk_name)
+                            else:
+                                raise RedisConnectForeignKeyException(f"{fk_model}: Foreign key action is invalid ({fk_key}: {fk_action} - {fk_idname}: {fk_id})!")
+                except json.JSONDecodeError:
+                    raise RedisConnectForeignKeyException(f"{fk_model}: Failed to decode __referenced__ field. Data might be corrupted.")
+                
             redis_handler.delete(name)
         
         if isinstance(identify, list):

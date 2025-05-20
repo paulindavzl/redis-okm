@@ -53,7 +53,7 @@ class Getter:
                     if attr == typ(condition):
                         models.append(model)
                 except ValueError:
-                    raise GetterConditionTypeException(f'The "{param}" condition must be a possible {typ.__name__}. {param}: {condition} {type(condition).__name__}')
+                    raise GetterConditionTypeException(f'The "{param}" condition must be a possible {typ.__name__}. {param}: "{condition}" ({type(condition).__name__})')
 
         if len(models) == 1:
             return models[0]

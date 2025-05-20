@@ -38,3 +38,9 @@ class RedisConnectInvalidExpireException(ValueError):
     """
     Expire must be a int or float value (1, 1.5, "1", "1.5")
     """
+
+
+class RedisConnectForeignKeyException(ValueError):
+    """
+    Foreign Key error
+    """

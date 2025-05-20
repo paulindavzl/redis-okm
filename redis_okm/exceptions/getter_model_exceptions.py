@@ -21,6 +21,11 @@ class GetterAttributeException(AttributeError):
     Condition or reference attribute does not exist in the model.
     """
 
+class GetterConditionTypeException(ValueError):
+    """
+    Incompatible attribute type and condition
+    """
+
 
 class GetterReferenceTypeException(TypeError):
     """

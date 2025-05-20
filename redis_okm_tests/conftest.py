@@ -13,7 +13,7 @@ def check_if_use_tests():
 
 
 settings_test = Settings("test_redis_configure.json")
-settings_test.set_config(testing=True, timeout=1, retry_on_timeout=[True, 1])
+settings_test.set_config(testing=True, timeout=0.1, retry_on_timeout=False)
 
 
 class TestModel(RedisModel):

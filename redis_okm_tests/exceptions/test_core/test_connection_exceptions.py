@@ -2,10 +2,10 @@ import os
 import re
 import pytest 
 
-from redis_okm.core.connection import RedisConnect
+from redis_okm.tools import RedisConnect, Settings, RedisModel
 from redis_okm.exceptions.connection_exceptions import *
 
-from redis_okm_tests.conftest import TestModel, Settings
+from redis_okm_tests.conftest import TestModel
 
 
 def test__exceptions__redis_connect__settings_instance_exception():
@@ -24,6 +24,7 @@ def test__exceptions__redis_connect__connection_failed_exception():
     expected = re.escape("Unable to connect to Redis database: Error 10061 connecting to localhost:6379. Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.")
 
     settings = Settings(path)
+    settings.set_config(retry_on_timeout=False, timeout=0.1)
     with pytest.raises(RedisConnectConnectionFailedException, match=expected):
         RedisConnect._connect(use_model=False, settings=settings, db="tests")
 
@@ -49,12 +50,12 @@ def test__exceptions__redis_connect__already_registered_exception():
 
 
 def test__exceptions__redis_connect__no_identifier_exception():
-    expected1 = re.escape("Use an instance of the model (TestModel) or provide an identifier.")
+    expected1 = re.escape("TestModel: Use an instance of the model or provide an identifier.")
 
     with pytest.raises(RedisConnectNoIdentifierException, match=expected1):
         RedisConnect.exists(TestModel)
 
-    expected2 = re.escape("Use an instance of the model (TestModel) or provide an identifier.")
+    expected2 = re.escape("TestModel: Use an instance of the model or provide an identifier.")
 
     with pytest.raises(RedisConnectNoIdentifierException, match=expected2):
         RedisConnect.delete(TestModel)
@@ -75,3 +76,42 @@ def test__exceptions__redis_connect__invalid_expire_exception():
 
     with pytest.raises(RedisConnectInvalidExpireException, match=expected):
         RedisConnect.add(model)
+
+    
+def test__exceptions__redis_connect__foreign_key_exception():
+    RedisConnect.add(TestModel(attr1="test", attr2=0, attr3=0))
+
+    class TestFK(RedisModel):
+        __testing__ = True
+        __db__ = "tests"
+        __action__ = {"reference": "restrict"}
+
+        tid: int
+        reference: TestModel
+
+    expected1 = re.escape("TestModel: It was not possible to delete the model because it is a reference to another record (TestFK - tid: 0 - reference)!")
+    with pytest.raises(RedisConnectForeignKeyException, match=expected1):
+        RedisConnect.add(TestFK(reference="test"))
+        RedisConnect.delete(TestModel, "test")
+
+    expected2 = re.escape("TestFK2: Foreign key action is invalid (reference: a - tid: 0)!")
+    with pytest.raises(RedisConnectForeignKeyException, match=expected2):
+        class TestFK2(RedisModel):
+            __tablename__ = "testing"
+            __testing__ = True
+            __db__ = "tests"
+            __action__ = {"reference": "a"}
+
+            tid: int
+            reference: TestModel
+
+        RedisConnect.add(TestFK2(reference="test"))
+        RedisConnect.delete(TestModel, "test")
+    
+    expected3 = re.escape('TestFK: Foreign key "reference" (TestModel) with ID "test" has no record!')
+    with pytest.raises(RedisConnectForeignKeyException, match=expected3):
+        RedisConnect.delete(TestFK, 0, True)
+        RedisConnect.delete(TestFK2, 0, True)
+        test3 = TestFK(reference="test")
+        RedisConnect.delete(TestModel, "test")
+        RedisConnect.add(test3)

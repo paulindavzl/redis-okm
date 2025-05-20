@@ -1,5 +1,4 @@
-from redis_okm.models.getter_model import Getter
-from redis_okm.core.connection import RedisConnect
+from redis_okm.tools import Getter, RedisConnect, RedisModel
 
 from redis_okm_tests.conftest import TestModel, settings_test
 
@@ -55,6 +54,30 @@ def test__redis_connection__get():
     assert isinstance(model2, TestModel)
 
 
+def test__redis_connect__add_get__foreign_key():
+    assert not RedisConnect.exists(TestModel, "test")
+    RedisConnect.add(TestModel(attr1="test", attr2=7357, attr3="73.57"))
+
+    class TestFK(RedisModel):
+        __db__ = "tests"
+        __testing__ = True
+        __action__ = {"test_model":"cascade"}
+
+        tid: int
+        test_model: TestModel
+
+    assert not RedisConnect.exists(TestFK, identify=0)
+    fk = TestFK(test_model="test")
+    RedisConnect.add(fk)
+
+    test_fk = RedisConnect.get(TestFK).filter_by(tid=0)
+    assert test_fk.tid == 0
+
+    test_model = test_fk.test_model()
+
+    assert test_model.attr1 == "test"
+
+
 def test__redis_connect__delete():
     models = []
     for i in range(4):
@@ -72,6 +95,27 @@ def test__redis_connect__delete():
     RedisConnect.delete(TestModel, [2, 3])
 
     assert RedisConnect.count("tests", settings_test, "True") == 0
+
+
+def test__redis_connect__delete__foreign_key():
+    RedisConnect.add(TestModel(attr1="test", attr2=0, attr3=0))
+    assert RedisConnect.exists(TestModel, "test")
+
+    class TestFK(RedisModel):
+        __db__ = "tests"
+        __testing__ = True
+        __action__ = {"test_model":"cascade"}
+
+        tid: int
+        test_model: TestModel
+
+    test = TestFK(test_model="test")
+    RedisConnect.add(test)
+    assert RedisConnect.exists(test)
+
+    RedisConnect.delete(TestModel, "test")
+
+    assert not RedisConnect.exists(test)
 
 
 def test__redis_connect__count():

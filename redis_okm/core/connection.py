@@ -106,46 +106,57 @@ class RedisConnect:
             setattr(model, idname, identify)
             model.to_dict[idname] = identify
 
-        def _add(handler: redis.Redis, algorithm, set_id: bool=False):
+        def _add(handler: redis.Redis, _settings: Settings, algorithm, set_id: bool=False):
             if RedisConnect.exists(model) and not exists_ok:
                 if not set_id:
                     raise RedisConnectionAlreadyRegisteredException(f"{type(model).__name__}: This {idname} ({getattr(model, idname)}) already exists in the database!")
                 else:
                     _set_identify(algorithm)
-            else:
-                name = RedisConnect._get_name(model)
-                content = model.to_dict
-                fks: dict = model.__foreign_keys__
-                if fks:
-                    model_name = type(model).__name__
-                    for key, value in fks.items():
-                        id = value["id"]
-                        fk_model = value["model"](instance=False, identify=id)
-                        fk_name = RedisConnect._get_name(fk_model)
-                        fk_handler = RedisConnect._connect(fk_model)
-                        fk_settings: Settings = fk_model.__settings__
-                        fk_db = fk_model.__db__
-                        fk_testing = fk_model.__testing__
-                        fk_tablename__ = fk_model.__tablename__
 
-                        fk_data = fk_handler.hgetall(fk_name)
-                        eid = id if isinstance(id, int) else f'"{id}"'
-                        if not fk_data:
-                            raise RedisConnectForeignKeyException(f'{type(model).__name__}: Foreign key "{key}" ({value["model"].__name__}) with ID {eid} has no record!')
+            name = RedisConnect._get_name(model)
+            content = model.to_dict
+            fks: dict = model.__foreign_keys__
+            if fks:
+                model_name = type(model).__name__
+                for key, value in fks.items():
+                    id = value["id"]
+                    fk_model = value["model"](instance=False, identify=id)
+                    fk_settings: Settings = fk_model.__settings__
 
-                        referenced = fk_data.get("__referenced__")
-                        referenced = json.loads(referenced) if referenced else {}
-                        
-                        referenced[fk_tablename__] = {"key": key, "name": name, "action": model.__action__[key], "connection": fk_settings.redis_info, "db": fk_db, "testing": fk_testing, "model": model_name, "idname": model.__idname__, "id": getattr(model, model.__idname__)}
+                    differences = [
+                        "HOST" if fk_settings.host != _settings.host else "", 
+                        "PORT" if fk_settings.port != _settings.port else "",
+                        "PASSWORD" if fk_settings.password != _settings.password else ""
+                    ] 
+                    differences = [d for d in differences if d]
+                    if differences:
+                        raise RedisConnectForeignKeyException(f"{model_name}: The connection information (HOST, PORT and PASSWORD) of the reference model ({type(fk_model).__name__}) and the referenced model ({model_name}) must be the same. Differences: {", ".join(differences)}")
+                    
+                    fk_name = RedisConnect._get_name(fk_model)
+                    fk_handler = RedisConnect._connect(fk_model)
+                    fk_db = fk_model.__db__
+                    fk_testing = fk_model.__testing__
+                    fk_tablename__ = fk_model.__tablename__
 
-                        referenced = json.dumps(referenced)
-                        fk_data["__referenced__"] = referenced
-                        
-                        fk_handler.hset(fk_name, mapping=fk_data)
 
-                        content[key] = id
-                                                
-                handler.hset(name, mapping=content)
+                    fk_data = fk_handler.hgetall(fk_name)
+                    eid = id if isinstance(id, int) else f'"{id}"'
+                    if not fk_data:
+                        raise RedisConnectForeignKeyException(f'{type(model).__name__}: Foreign key "{key}" ({value["model"].__name__}) with ID {eid} has no record!')
+
+                    referenced = fk_data.get("__referenced__")
+                    referenced = json.loads(referenced) if referenced else {}
+                    
+                    referenced[fk_tablename__] = {"key": key, "name": name, "action": model.__action__[key], "db": fk_db, "testing": fk_testing, "model": model_name, "idname": model.__idname__, "id": getattr(model, model.__idname__)}
+
+                    referenced = json.dumps(referenced)
+                    fk_data["__referenced__"] = referenced
+                    
+                    fk_handler.hset(fk_name, mapping=fk_data)
+
+                    content[key] = id
+                                            
+            handler.hset(name, mapping=content)
 
         if not model.__instancied__:
             raise RedisConnectionModelInstanceException(f"{model.__name__}: The model must be instantiated to be added to the database!")
@@ -159,7 +170,7 @@ class RedisConnect:
             _set_identify(algorithm)
 
         redis_handler = RedisConnect._connect(model)
-        _add(redis_handler, algorithm, set_id)
+        _add(redis_handler, settings, algorithm, set_id)
 
         # verifica se tem expiração
         expire = getattr(model, "__expire__")
@@ -298,6 +309,7 @@ class RedisConnect:
 
             referenced = redis_handler.hget(name, "__referenced__")
             if referenced:
+                fk_connection = delete_model.__settings__.redis_info
                 try:
                     referenced: dict = json.loads(referenced)
 
@@ -305,7 +317,6 @@ class RedisConnect:
                         fk_key = value["key"]
                         fk_name = value["name"]
                         fk_action = value["action"]
-                        fk_connection = value["connection"]
                         fk_testing = value["testing"]
                         fk_model = value["model"]
                         fk_idname = value["idname"]

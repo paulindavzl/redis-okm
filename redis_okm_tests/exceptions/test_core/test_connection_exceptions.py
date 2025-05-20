@@ -115,3 +115,29 @@ def test__exceptions__redis_connect__foreign_key_exception():
         test3 = TestFK(reference="test")
         RedisConnect.delete(TestModel, "test")
         RedisConnect.add(test3)
+
+    expected4 = re.escape("TestFK3: The connection information (HOST, PORT and PASSWORD) of the reference model (TestModel) and the referenced model (TestFK3) must be the same. Differences: HOST")
+    with pytest.raises(RedisConnectForeignKeyException, match=expected4):
+        sett = Settings("test_error.json")
+        sett.set_config(host="error")
+
+        class TestFK3(RedisModel):
+            __testing__ = True
+            __db__ = "tests"
+            __action__ = {"referenced": "cascade"}
+
+            tid: int
+            referenced: TestModel
+
+        RedisConnect.add(TestModel(attr1="test", attr2=0, attr3=0))
+
+        test2 = TestFK3(referenced="test")
+        test2.__settings__ = sett
+
+        RedisConnect.add(test2)
+
+        if os.path.exists("test_error.json"):
+            os.remove("test_error.json")
+
+    if os.path.exists("test_error.json"):
+        os.remove("test_error.json")

@@ -1,7 +1,8 @@
+import os
 import re
 import pytest
 
-from redis_okm.models import RedisModel
+from redis_okm.tools import RedisModel, Settings
 from redis_okm.exceptions.redis_model_exceptions import *
 
 
@@ -114,10 +115,29 @@ def test__exceptions__redis_model__foreign_key_exception():
     expected5 = re.escape('TestModel: To define the foreign key "fk", add an action for it in __action__')
     with pytest.raises(RedisModelForeignKeyException, match=expected5):
         class TestModel(RedisModel):
-            __db__ = "tests"
+            __db__ = 10
             __testing__ = True
 
             attr1: str
             fk: TestModel
         
         test = TestModel(fk=0)
+
+    expected6 = re.escape("TestFK: The connection information (HOST, PORT and PASSWORD) of the reference model (TestModel) and the referenced model (TestFK) must be the same. Differences: HOST")
+    with pytest.raises(RedisModelForeignKeyException, match=expected6):
+        sett = Settings("test_error.json")
+        sett.set_config(host="error")
+
+        class TestFK(RedisModel):
+            __testing__ = True
+            __settings__ = sett
+            __db__ = "tests"
+
+            tid: int
+            referenced: TestModel
+
+        if os.path.exists("test_error.json"):
+            os.remove("test_error.json")
+
+    if os.path.exists("test_error.json"):
+        os.remove("test_error.json")

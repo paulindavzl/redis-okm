@@ -1,4 +1,3 @@
-
 # RedisConnect
 
 O **RedisConnect** é a classe que se conecta com o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**. A partir dela, é possível fazer todas as operações com o banco de dados que o **RedisOKM** disponibiliza.
@@ -15,6 +14,7 @@ O **RedisConnect** é a classe que se conecta com o **[Redis](https://redis.io/ 
   * **[Contar registros](#contar-a-quantidade-de-registros-no-banco-de-dados "Conte a quantidade de registros existentes")** – Saiba como contar quantos registros existem.
   * **[Verificar existência](#verificar-se-um-registro-existe "Veja como verificar a existência de registros")** – Método para saber se um dado existe no **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
   * **[Apagar todos os registros](#apagar-todos-os-registros-de-um-banco-de-dados "Zere todo o banco de dados")** – Veja como limpar totalmente um ou mais bancos **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**.
+* **[Docs](#docs "Outras documentações")** - Veja outras documentações com instruções para melhores usos da biblioteca
 
 ---
 
@@ -133,7 +133,7 @@ class Model(RedisModel):
 	...
 ```
 
-Veja mais em **[modelos](./RedisModel.md "Veja mais sobre modelos").**
+> 🧠 Nota: Se o modelo possuir atributos relacionados a outras classes (`chaves estrangeiras`), a `RedisConnect` tratará essas referências automaticamente durante a operação `.add()`. Para saber mais, veja a documentação sobre **[modelos e chaves estrangeiras](./RedisModel.md).**
 
 ### Obter registros
 
@@ -295,5 +295,34 @@ def restart_all():
 	RedisConnect.restart_full_db(db="__all__", settings) # "__all__" apaga todos os registros de todos os bancos de dados
 ```
 
-> ⚠️**Atenção:** Este processo é irreversível, cuidado ao usar!
->
+> ⚠️**Cuidado:** Este processo é **irreversível**, cuidado ao usar!
+
+---
+
+## Docs
+
+Veja também outras documentações úteis para trabalhar com **RedisOKM:**
+
+### Boas práticas
+
+O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da biblioteca. Veja mais em **[Boas Práticas](./BoasPráticas.md "Veja mais sobre Boas Práticas.").**
+
+### RedisModel
+
+**RedisModel** é a classe base de todo modelo de **RedisOKM** deve herdar. Veja mais sobre em **[RedisModel](./RedisModelt.md "Veja mais sobre RedisModel")**.
+
+### Settings
+
+**Settings** é a classe usada para configurar e obter configurações gerais sobre conexões e outras. Veja mais sobre ela em **[Settings](./Settings.md "Veja mais sobre Settings")**.
+
+### Getter
+
+**Getter** é a classe retornada ao fazer uma consulta com **RedisConnect**. Ela agrupa o retorno de mais de um modelo e permite consultas personalizadas. Veja mais sobre ela em **[Getter](./Getter.md "Veja mais sobre Getter")**.
+
+### Exceptions
+
+O **RedisOKM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./Exceptions.md "Veja mais sobre Exceptions")**.
+
+### Licença
+
+**RedisOKM** é distribuído sob a Licença MIT. Veja o arquivo **[LICENSE](./LICENSE "LICENÇA de uso")** para mais detalhes.

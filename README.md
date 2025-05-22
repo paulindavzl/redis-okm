@@ -45,7 +45,7 @@ pip install redis-okm
 
 ### 1. Crie modelos
 
-Um modelo é a representação de uma tabela em um banco de dados. Embora o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")** não funcione com o formato **tabela/coluna** como o  **SQL**, o **RedisOKM** se organiza de maneira semelhante a esse formato.
+Um modelo é a representação de uma tabela em um banco de dados. Embora o **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")** não funcione com o formato **tabela/coluna** como o **SQL**, o **RedisOKM** se organiza de maneira semelhante a esse formato.
 
 Modelos devem herdar de **RedisModel:**
 
@@ -147,7 +147,7 @@ RedisConnect.delete(
 
 ```json
 {
-    "envfile": "",
+    "envfile": null,
     "tests": {
         "use_tests": true,
         "db": "tests",
@@ -156,7 +156,7 @@ RedisConnect.delete(
     "network": {
         "host": "localhost",
         "port": 6379,
-        "password": ""
+        "password": null
     },
     "connection": {
         "decode_response": true,
@@ -172,7 +172,8 @@ RedisConnect.delete(
     },
     "structure": {
         "separator": ":",
-        "prefix": "cwd"
+        "prefix": "cwd",
+        "hash_algorithm": "md5"
     },
     "dbnames": {
         "tests": 15
@@ -212,7 +213,7 @@ class UserModel(RedisModel):
 from redis_okm.tools import settings # todas as alterações afetarão os modelos que usam a instância padrão
 ```
 
-**Settings** também tem suporte a variáveis de ambiente. Veja mais em  **[Settings](#settings)** .
+**Settings** também tem suporte a variáveis de ambiente. Veja mais em **[Settings](#settings)**.
 
 ---
 
@@ -278,6 +279,8 @@ class UserModel(RedisModel):
     uid: int
     name: str
     password: str
+
+    address: AddressModel  # chave estrangeira para o modelo AddressModel
 
     # valores padrões
     status = "active"
@@ -394,15 +397,25 @@ class UserModelRepository:
 
 ```
 
-> ⚠️**Recomendação:** Neste exemplo, todas as funções e classes estão no mesmo código, mas para fins de organização faça a separação em arquivos e módulos separados.
+> ⚠️**Recomendação:** Neste exemplo, todas as funções e classes estão no mesmo código, mas para fins de organização faça a separação em arquivos e módulos separados. Veja mais sobre chaves estrangeiras em **[RedisModel](#redismodel "Veja mais sobre RedisModel")**.
 
 ---
 
 ## Docs
 
+Veja também outras documentações úteis para trabalhar com **RedisOKM:**
+
+### Boas práticas
+
+O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da biblioteca. Veja mais em **[Boas Práticas](./docs/BoasPráticas.md "Veja mais sobre Boas Práticas.").**
+
 ### RedisConnect
 
 **RedisConnect** é a classe que se conecta de fato com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**. Veja mais sobre ela em **[RedisConnect](./docs/RedisConnect.md "Veja mais sobre RedisConnect")**.
+
+### RedisModel
+
+**RedisModel** é a classe que todo modelo de **RedisOKM** deve herdar. Veja mais sobre em **[RedisModel](./docs/RedisModelt.md "Veja mais sobre RedisModel")**.
 
 ### Settings
 

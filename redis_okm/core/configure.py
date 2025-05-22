@@ -247,7 +247,8 @@ class Settings:
             "password": "network",
             "use_tests": "tests",
             "db_test": "tests",
-            "restart_db": "tests"
+            "restart_db": "tests",
+            "hash_algorithm": "structure"
         }
         settings = self._get_file_data()
         for config, value in configs.items():

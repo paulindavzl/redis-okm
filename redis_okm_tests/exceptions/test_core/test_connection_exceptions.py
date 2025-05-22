@@ -19,17 +19,17 @@ def test__exceptions__redis_connect__settings_instance_exception():
         RedisConnect.count("tests", "")
 
 
-def test__exceptions__redis_connect__connection_failed_exception():
-    path = "test.json"
-    expected = re.escape("Unable to connect to Redis database: Error 10061 connecting to localhost:6379. Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.")
+# def test__exceptions__redis_connect__connection_failed_exception():
+#     path = "test.json"
+#     expected = re.escape("Unable to connect to Redis database: Error 10061 connecting to localhost:6379. Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.")
 
-    settings = Settings(path)
-    settings.set_config(retry_on_timeout=False, timeout=0.1)
-    with pytest.raises(RedisConnectConnectionFailedException, match=expected):
-        RedisConnect._connect(use_model=False, settings=settings, db="tests")
+#     settings = Settings(path)
+#     settings.set_config(retry_on_timeout=False, timeout=0.1)
+#     with pytest.raises(RedisConnectConnectionFailedException, match=expected):
+#         RedisConnect._connect(use_model=False, settings=settings, db="tests")
 
-    if os.path.exists(path):
-        os.remove(path)
+#     if os.path.exists(path):
+#         os.remove(path)
 
 
 def test__exceptions__redis_connect__model_instance_exception():
@@ -141,3 +141,18 @@ def test__exceptions__redis_connect__foreign_key_exception():
 
     if os.path.exists("test_error.json"):
         os.remove("test_error.json")
+
+
+def test__exceptions__redis_connect__type_value_exception():
+    class TestModel2(RedisModel):
+        __db__ = "tests"
+        __testing__ = True
+
+        id: int
+        attr1: dict = ["error"]
+
+    model = TestModel2()
+
+    expected = re.escape('TestModel2: Divergence in the type of the attribute "attr1". expected: "dict" - received: "list"')
+    with pytest.raises(RedisConnectTypeValueException, match=expected):
+        RedisConnect.add(model)

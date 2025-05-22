@@ -174,8 +174,12 @@ class RedisModel:
                     raise RedisModelForeignKeyException(f'{cls_name}: To define the foreign key "{attr}", add an action for it in __action__')
                 
                 try:
+                    if typ in [dict, list, tuple]:
+                        if not isinstance(value, typ):
+                            raise RedisModelTypeValueException(f'{cls_name}: Divergence in the type of the attribute "{attr}". expected: "{typ.__name__}" - received: "{type(value).__name__}"')
                     attrs[attr] = typ(value) if value != "__await_autoid__" else value
-                except ValueError:
+                except ValueError as e:
+                    print(e)
                     raise RedisModelTypeValueException(f"{cls_name}: {attr} expected a possible {typ.__name__} value, but received a {type(value).__name__} ({value}) value!")
                 except Exception as e:
                     raise e

@@ -114,7 +114,7 @@ class RedisConnect:
                     _set_identify(algorithm)
 
             name = RedisConnect._get_name(model)
-            content = model.to_dict
+            content: dict = model.to_dict
             fks: dict = model.__foreign_keys__
             if fks:
                 model_name = type(model).__name__
@@ -155,6 +155,14 @@ class RedisConnect:
                     fk_handler.hset(fk_name, mapping=fk_data)
 
                     content[key] = id
+
+            for key, value in content.items():
+                if isinstance(value, (dict, list, tuple)):
+                    typ: type = model.__annotations__[key]
+                    if typ != type(value):
+                        raise RedisConnectTypeValueException(f'{type(model).__name__}: Divergence in the type of the attribute "{key}". expected: "{typ.__name__}" - received: "{type(value).__name__}"')
+                    
+                    content[key] = json.dumps(value)
                                             
             handler.hset(name, mapping=content)
 
@@ -252,6 +260,11 @@ class RedisConnect:
         for name in redis_handler.scan_iter(pattern):
             resp = redis_handler.hgetall(name)
             resp.pop("__referenced__", None)
+
+            for key, value in resp.items():
+                typ: type = model.__annotations__[key]
+                if typ in [list, dict, tuple]:
+                    resp[key] = json.loads(value)
 
             new_model = model.__class__(set_fk=_set_fk, **resp)
             getters.append(new_model)

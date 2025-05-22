@@ -50,6 +50,17 @@ def test__exceptions__redis_model__type_value_exception():
             attr1: float
             attr2: str
 
+    expected3 = re.escape('TestModel3: Divergence in the type of the attribute "attr2". expected: "dict" - received: "list"')
+    with pytest.raises(RedisModelTypeValueException, match=expected3):
+        class TestModel3(RedisModel):
+            __db__ = "tests"
+            __testing__ = False
+
+            attr1: int
+            attr2: dict
+
+        model = TestModel3(attr2=[])
+
     
 def test__exceptions__redis_model__no_value_exception():
     class TestModel(RedisModel):

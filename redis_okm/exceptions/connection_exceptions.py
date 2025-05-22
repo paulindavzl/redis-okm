@@ -1,46 +1,52 @@
-class RedisConnectionSettingsInstanceException(TypeError):
+class RedisConnectionSettingsInstanceException(Exception):
     """
     The settings passed to **Connect** via the model must be an instance of Settings.
     """
 
 
-class RedisConnectionModelInstanceException(TypeError):
+class RedisConnectionModelInstanceException(Exception):
     """
     Model is not instantiated.
     """
 
 
-class RedisConnectionAlreadyRegisteredException(ValueError):
+class RedisConnectionAlreadyRegisteredException(Exception):
     """
     Model already has registration.
     """
 
 
-class RedisConnectConnectionFailedException(ConnectionError):
+class RedisConnectConnectionFailedException(Exception):
     """
     Connection to Redis server failed.
     """
 
 
-class RedisConnectNoIdentifierException(ValueError):
+class RedisConnectNoIdentifierException(Exception):
     """
     No identification was provided.
     """
 
 
-class RedisConnectNoRecordsException(ValueError):
+class RedisConnectNoRecordsException(Exception):
     """
     No records with the identifier.
     """
 
 
-class RedisConnectInvalidExpireException(ValueError):
+class RedisConnectInvalidExpireException(Exception):
     """
     Expire must be a int or float value (1, 1.5, "1", "1.5")
     """
 
 
-class RedisConnectForeignKeyException(ValueError):
+class RedisConnectForeignKeyException(Exception):
     """
     Foreign Key error
+    """
+
+
+class RedisConnectTypeValueException(Exception):
+    """
+    Invalid value type
     """

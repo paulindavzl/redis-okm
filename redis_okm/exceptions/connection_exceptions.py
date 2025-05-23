@@ -50,3 +50,9 @@ class RedisConnectTypeValueException(Exception):
     """
     Invalid value type
     """
+
+
+class RedisConnectGetOnCorruptException(Exception):
+    """
+    on_corrupt invalid.
+    """

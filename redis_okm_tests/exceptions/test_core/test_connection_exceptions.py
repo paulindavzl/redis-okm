@@ -19,17 +19,17 @@ def test__exceptions__redis_connect__settings_instance_exception():
         RedisConnect.count("tests", "")
 
 
-# def test__exceptions__redis_connect__connection_failed_exception():
-#     path = "test.json"
-#     expected = re.escape("Unable to connect to Redis database: Error 10061 connecting to localhost:6379. Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.")
+def test__exceptions__redis_connect__connection_failed_exception():
+    path = "test.json"
+    expected = re.escape("Unable to connect to Redis database: Error 10061 connecting to localhost:6379. Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente.")
 
-#     settings = Settings(path)
-#     settings.set_config(retry_on_timeout=False, timeout=0.1)
-#     with pytest.raises(RedisConnectConnectionFailedException, match=expected):
-#         RedisConnect._connect(use_model=False, settings=settings, db="tests")
+    settings = Settings(path)
+    settings.set_config(retry_on_timeout=False, timeout=0.1)
+    with pytest.raises(RedisConnectConnectionFailedException, match=expected):
+        RedisConnect._connect(use_model=False, settings=settings, db="tests")
 
-#     if os.path.exists(path):
-#         os.remove(path)
+    if os.path.exists(path):
+        os.remove(path)
 
 
 def test__exceptions__redis_connect__model_instance_exception():

@@ -102,3 +102,19 @@ def test__exceptions__getter__filter_by__condition_type_exception(getter: Getter
 
     with pytest.raises(GetterConditionTypeException, match=expected):
         getter.filter_by(attr3="test_error")
+
+
+def test__exceptions__getter__corruption_exception():
+    expected = re.escape("TestModel: The information in this record (attr1: test) is corrupt!")
+    test = TestModel(attr1="test", attr2=0, attr3=0)
+    test.__status__ = False
+    gett = Getter([test])
+
+    with pytest.raises(GetterCorruptionException, match=expected):
+        gett.filter_by(attr1="test")
+
+    with pytest.raises(GetterCorruptionException, match=expected):
+        gett.first()
+
+    with pytest.raises(GetterCorruptionException, match=expected):
+        gett.last()

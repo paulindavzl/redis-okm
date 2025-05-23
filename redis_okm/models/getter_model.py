@@ -56,7 +56,10 @@ class Getter:
                     raise GetterConditionTypeException(f'The "{param}" condition must be a possible {typ.__name__}. {param}: "{condition}" ({type(condition).__name__})')
 
         if len(models) == 1:
-            return models[0]
+            mdl = models[0]
+            if mdl.__status__:
+                return mdl
+            raise GetterCorruptionException(f"{type(model).__name__}: The information in this record ({model.__idname__}: {getattr(model, model.__idname__)}) is corrupt!")
         elif len(models) > 1:
             return Getter(models)
         return None
@@ -69,6 +72,7 @@ class Getter:
         if reference is not None and not isinstance(reference, str):
             raise GetterReferenceTypeException(f"reference must be a str (string)! reference: {reference} ({type(reference).__name__})")
         
+        resp = ""
         if reference:
             models = {}
             references = []
@@ -85,8 +89,13 @@ class Getter:
             
             references = sorted(references)
             key = references[0]
-            return models.get(key)
-        return self._getters[0] if self._getters else None
+            resp = models.get(key)
+            
+        resp = self._getters[0] if self._getters else None
+        if resp:
+            if resp.__status__:
+                return resp
+            raise GetterCorruptionException(f"{type(resp).__name__}: The information in this record ({resp.__idname__}: {getattr(resp, resp.__idname__)}) is corrupt!")
         
 
     def last(self, reference: None|str=None) -> None|_model:
@@ -96,6 +105,7 @@ class Getter:
         if reference is not None and not isinstance(reference, str):
             raise GetterReferenceTypeException(f"reference must be a str (string)! reference: {reference} ({type(reference).__name__})")
         
+        resp = ""
         if reference:
             models = {}
             references = []
@@ -112,5 +122,48 @@ class Getter:
             
             references = sorted(references, reverse=True)
             key = references[0]
-            return models.get(key)
-        return self._getters[-1] if self._getters else None
+            resp = models.get(key)
+        resp = self._getters[-1] if self._getters else None
+    
+        if resp:
+            if resp.__status__:
+                return resp
+            raise GetterCorruptionException(f"{type(resp).__name__}: The information in this record ({resp.__idname__}: {getattr(resp, resp.__idname__)}) is corrupt!")
+        
+    
+    @property
+    def has_corrupted(self) -> bool:
+        """
+        Verifica se possui algum modelo corrompido
+        """
+        for model in self._getters:
+            if model.__status__ is False:
+                return True
+            
+        return False
+    
+
+    def valid_only(self) -> Getter|None:
+        """
+        Retorna somente modelos válidos
+        """
+        getters = []
+        for model in self._getters:
+            if model.__status__:
+                getters.append(model)
+
+        if getters:
+            return Getter(getters)
+        
+
+    def report(self) -> list[str|int]|None:
+        """
+        Retorna os modelos corrompidos
+        """
+        models = []
+        for model in self._getters:
+            if model.__status__ is False:
+                identify = getattr(model, model.__idname__)
+                models.append(identify)
+        
+        return models if models else None

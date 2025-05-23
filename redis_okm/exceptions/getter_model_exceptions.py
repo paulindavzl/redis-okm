@@ -33,3 +33,8 @@ class GetterReferenceTypeException(TypeError):
     """
 
 
+class GetterCorruptionException(Exception):
+    """
+    Corrupted information
+    """
+

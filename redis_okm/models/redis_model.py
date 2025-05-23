@@ -1,4 +1,5 @@
 from __future__ import annotations
+import hashlib
 from types import MemberDescriptorType
 
 from .. import settings
@@ -11,7 +12,7 @@ class RedisModel:
     """
     Base para todos os modelos em RedisOKM
     """
-    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__"]
+    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "status"]
 
     def _set_attributes(cls, ann: dict[str|type]):
         cls_name = cls.__name__ if callable(cls) else type(cls).__name__
@@ -68,6 +69,8 @@ class RedisModel:
         cls.__action__ = action
         cls.__references__ = {}
         cls.to_dict = {}
+        cls.__status__ = True
+        cls.__key__ = "__await_identify__"
 
         cls.__foreign_keys__: dict[type, any] = {}
         for attr, value in ann.items():
@@ -209,6 +212,7 @@ class RedisModel:
                 typ: type = self.__class__.__annotations__[idname]
                 setattr(self, idname, typ(identify))
 
+        
      
 
 

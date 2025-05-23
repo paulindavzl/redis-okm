@@ -163,6 +163,17 @@ class RedisConnect:
                         raise RedisConnectTypeValueException(f'{type(model).__name__}: Divergence in the type of the attribute "{key}". expected: "{typ.__name__}" - received: "{type(value).__name__}"')
                     
                     content[key] = json.dumps(value)
+
+            content = {k: str(v) for k, v in content.items()}
+            setattr(model, "__key__", hashlib.sha256(
+                str(model.__idname__).encode("utf-8")
+                +str(model.__tablename__).encode("utf-8")
+                +str(model.__db__).encode("utf-8")
+                +str(getattr(model, model.__idname__)).encode("utf-8")
+            ).hexdigest())
+            data = str(model.__key__).encode("utf-8") + str(json.dumps(content)).encode("utf-8")
+            hs = hashlib.sha256(data).hexdigest()
+            content["__hash__"] = hs
                                             
             handler.hset(name, mapping=content)
 
@@ -230,7 +241,7 @@ class RedisConnect:
     
 
     @staticmethod
-    def get(model: _model, _set_fk: bool=True) -> Getter:
+    def get(model: _model, on_corrupt="flag", _set_fk: bool=True) -> Getter:
         """
         Obtém dados do banco de dados baseado em modelos
 
@@ -252,6 +263,9 @@ class RedisConnect:
 
         if callable(model):
             model = RedisConnect._get_instance(model)
+
+        if on_corrupt not in ["skip", "flag", "ignore"]:
+            raise RedisConnectGetOnCorruptException(f'on_corrupt must be "flag", "skip" or "ignore"! on_corrupt: "{on_corrupt}"')
         
         pattern = RedisConnect._get_name(model, True)
 
@@ -259,14 +273,42 @@ class RedisConnect:
         getters = []
         for name in redis_handler.scan_iter(pattern):
             resp = redis_handler.hgetall(name)
+            
+            __hash__ = resp.pop("__hash__", "error")
+            content = resp
             resp.pop("__referenced__", None)
 
             for key, value in resp.items():
                 typ: type = model.__annotations__[key]
                 if typ in [list, dict, tuple]:
-                    resp[key] = json.loads(value)
+                    try:
+                        value = value.decode("utf-8") if isinstance(value, bytes) else value
+                        resp[key] = json.loads(value)
+                    except json.JSONDecodeError:
+                        resp[key] = "corrupted"
 
             new_model = model.__class__(set_fk=_set_fk, **resp)
+            
+            setattr(new_model, "__key__", hashlib.sha256(
+                str(new_model.__idname__).encode("utf-8")
+                +str(new_model.__tablename__).encode("utf-8")
+                +str(new_model.__db__).encode("utf-8")
+                +str(getattr(new_model, new_model.__idname__)).encode("utf-8")
+            ).hexdigest())
+
+            data = str(new_model.__key__).encode("utf-8")+str(json.dumps(content)).encode("utf-8")
+            hs = hashlib.sha256(
+                data
+            ).hexdigest()
+
+            if hs != __hash__:
+                if on_corrupt == "flag":
+                    new_model.__status__ = False
+                    for attr in new_model.__annotations__:
+                        if attr not in [new_model.__idname__, "__idname__"]:
+                            setattr(new_model, attr, "corrupted")
+                elif on_corrupt == "skip":
+                    continue
             getters.append(new_model)
 
         return Getter(getters)

@@ -90,8 +90,9 @@ class Getter:
             references = sorted(references)
             key = references[0]
             resp = models.get(key)
-            
-        resp = self._getters[0] if self._getters else None
+        else:
+            resp = self._getters[0] if self._getters else None
+
         if resp:
             if resp.__status__:
                 return resp
@@ -123,7 +124,8 @@ class Getter:
             references = sorted(references, reverse=True)
             key = references[0]
             resp = models.get(key)
-        resp = self._getters[-1] if self._getters else None
+        else:
+            resp = self._getters[-1] if self._getters else None
     
         if resp:
             if resp.__status__:

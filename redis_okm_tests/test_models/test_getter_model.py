@@ -39,7 +39,7 @@ def test__getter__first(getter: Getter):
     assert isinstance(model_default, TestModel)
     assert model_default.attr1 == "test4"
     assert isinstance(model_attr1, TestModel)
-    assert model_attr1.attr1 == "test4"
+    assert model_attr1.attr1 == "test0"
 
     
 def test__getter__last(getter: Getter):
@@ -49,7 +49,7 @@ def test__getter__last(getter: Getter):
     assert isinstance(model_default, TestModel)
     assert model_default.attr1 == "test0"
     assert isinstance(model_attr1, TestModel)
-    assert model_attr1.attr1 == "test0"
+    assert model_attr1.attr1 == "test4"
 
 
 def test__getter__has_corrupt():

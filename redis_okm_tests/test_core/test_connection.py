@@ -125,3 +125,29 @@ def test__redis_connect__count():
     RedisConnect.add(model)
 
     assert RedisConnect.count("tests", settings_test, "True") == 1
+
+
+def test__redis_connect__get__corrupt():
+    test = TestModel(attr1="test", attr2=0, attr3=0)
+    RedisConnect.add(test)
+
+    handler = RedisConnect._connect(TestModel)
+    name = RedisConnect._get_name(test)
+
+    handler.hset(name, mapping={"attr2":"10"})
+
+    flag = RedisConnect.get(TestModel, on_corrupt="flag")
+    corrupted = flag.report()
+    assert flag.has_corrupted
+    assert corrupted == ["test"]
+
+
+    skip = RedisConnect.get(TestModel, on_corrupt="skip").has_corrupted
+    assert not skip
+
+    ignore = RedisConnect.get(TestModel,on_corrupt="ignore")
+    assert not ignore.has_corrupted
+
+    model = ignore.filter_by(attr1="test")
+    assert model.attr2 == 10
+

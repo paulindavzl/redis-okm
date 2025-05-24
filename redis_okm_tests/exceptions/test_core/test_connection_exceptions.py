@@ -156,3 +156,10 @@ def test__exceptions__redis_connect__type_value_exception():
     expected = re.escape('TestModel2: Divergence in the type of the attribute "attr1". expected: "dict" - received: "list"')
     with pytest.raises(RedisConnectTypeValueException, match=expected):
         RedisConnect.add(model)
+
+
+def test__exceptions__redis_connect__get_on_corrupt__exception():
+    expected = re.escape('on_corrupt must be "flag", "skip" or "ignore"! on_corrupt: "raise"')
+
+    with pytest.raises(RedisConnectGetOnCorruptException, match=expected):
+        RedisConnect.get(TestModel, on_corrupt="raise")

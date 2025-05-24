@@ -50,3 +50,31 @@ def test__getter__last(getter: Getter):
     assert model_default.attr1 == "test0"
     assert isinstance(model_attr1, TestModel)
     assert model_attr1.attr1 == "test0"
+
+
+def test__getter__has_corrupt():
+    model = TestModel(attr1="test", attr2=0, attr3=0)
+    model.__status__ = False
+
+    gett = Getter([model])
+    assert gett.has_corrupted
+
+
+def test__getter__valid_only():
+    model1 = TestModel(attr1="test", attr2=0, attr3=0)
+    model2 = TestModel(attr1="test2", attr2=0, attr3=0)
+    model1.__status__ = False
+
+    gett = Getter([model1, model2])
+    valid = gett.valid_only().first()
+    assert valid.attr1 == "test2"
+
+
+def test__getter__report():
+    model1 = TestModel(attr1="test", attr2=0, attr3=0)
+    model2 = TestModel(attr1="test2", attr2=0, attr3=0)
+    model1.__status__ = False
+
+    gett = Getter([model1, model2])
+    corrupted = gett.report()
+    assert corrupted == ["test"]

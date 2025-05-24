@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Mini OKM para REDIS"
 authors = ["paulindavzl <paulochz01@gmail.com>"]
 license = "MIT"
-readme = "README.md"
+readme = "readme.md"
 packages = [
     {include="redis_okm"}
 ]

@@ -1,9 +1,7 @@
 import os
 import pytest
 
-from redis_okm.models import RedisModel
-from redis_okm import settings, Settings
-from redis_okm.core.connection import RedisConnect
+from redis_okm.tools import RedisModel, Settings, RedisConnect, settings
 
 
 @pytest.fixture(autouse=True)

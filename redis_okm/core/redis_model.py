@@ -3,7 +3,7 @@ import hashlib
 from types import MemberDescriptorType
 
 from .. import settings
-from ..core.connection import RedisConnect
+from .connection import RedisConnect
 from ..exceptions.redis_model_exceptions import *
 
 

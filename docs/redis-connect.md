@@ -20,7 +20,7 @@ O **RedisConnect** é a classe que se conecta com o **[Redis](https://redis.io/ 
 
 ## Como funciona
 
-O **RedisConnect** utiliza as informações de conexão que são definidas ao estruturar um **[modelo](./RedisModel.md "Veja mais sobre modelos"):**
+O **RedisConnect** utiliza as informações de conexão que são definidas ao estruturar um **[modelo](./redis-model.md "Veja mais sobre modelos"):**
 
 ```python
 class Model(RedisModel):
@@ -34,7 +34,7 @@ A partir destas duas informações, é possível realizar uma conexão com o ser
 
 Cada registro é salvo em uma chave única, gerada pela combinação dos elementos: _"prefixo:nome_da_tabela:id"_, com isso, cada registro fica uma chave única no banco de dados.
 
-> ⚠️**Atenção:** Esta chave é única desde que não exista mais de um **[modelo](./RedisModel.md "Veja mais sobre modelos")** com o mesmo `__tablename__`:
+> ⚠️**Atenção:** Esta chave é única desde que não exista mais de um **[modelo](./redis-model.md "Veja mais sobre modelos")** com o mesmo `__tablename__`:
 
 ```python
 class Model(RedisModel):
@@ -133,7 +133,7 @@ class Model(RedisModel):
 	...
 ```
 
-> 🧠 Nota: Se o modelo possuir atributos relacionados a outras classes (`chaves estrangeiras`), a `RedisConnect` tratará essas referências automaticamente durante a operação `.add()`. Para saber mais, veja a documentação sobre **[modelos e chaves estrangeiras](./RedisModel.md).**
+> 🧠 Nota: Se o modelo possuir atributos relacionados a outras classes (`chaves estrangeiras`), a `RedisConnect` tratará essas referências automaticamente durante a operação `.add()`. Para saber mais, veja a documentação sobre **[modelos e chaves estrangeiras](./redis-model.md).**
 
 ### Obter registros
 
@@ -142,11 +142,12 @@ Para obter um registro, é utilizado o método **RedisConnect.get(...):**
 ```python
 class RedisConnect:
 	@staticmethod
-	def get(model: _model) -> Getter:
+	def get(model: _model, on_corrupt="flag") -> Getter:
 		...
 
 
 # model se refere a classe do modelo que será buscado no banco de dados
+# on_corrupt indica o que fazer ao encontrar um registro corrompido ("flag" marca/invalida o modelo corrompido, "skip": não obtém os dados do registro corrompido, "ignore": ignora o fato do registro estar corrompido e retorna-o normalmente)
 # Getter é uma classe que agrupa modelos e métodos de consultas 
 
 
@@ -188,7 +189,7 @@ class ModelRepository:
 		return response
 ```
 
-> ⚠️**Observação:** Veja mais sobre a classe **[Getter](./Getter.md)**.
+> ⚠️**Observação:** Veja mais sobre a classe **[Getter](./getter.md)**.
 
 ### Apagar registros
 
@@ -251,7 +252,7 @@ def get_length_db(db):
 	return length
 ```
 
-> ⚠️**Atenção:** **RedisConnect.count(...)** contabiliza todos os registros em um banco de dados, mesmo que não sejam do mesmo modelo. Para obter a quantidade de um único modelo, use a propriedade `length` de **[Getter](./Getter.md)**, retornado de **[RedisConnect.get(...)](#obter-registros)**.
+> ⚠️**Atenção:** **RedisConnect.count(...)** contabiliza todos os registros em um banco de dados, mesmo que não sejam do mesmo modelo. Para obter a quantidade de um único modelo, use a propriedade `length` de **[Getter](./getter.md)**, retornado de **[RedisConnect.get(...)](#obter-registros)**.
 
 ### Verificar se um registro existe
 
@@ -305,7 +306,7 @@ Veja também outras documentações úteis para trabalhar com **RedisOKM:**
 
 ### Boas práticas
 
-O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da biblioteca. Veja mais em **[Boas Práticas](./BoasPráticas.md "Veja mais sobre Boas Práticas.").**
+O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da biblioteca. Veja mais em **[Boas Práticas](./good-practices.md "Veja mais sobre Boas Práticas.").**
 
 ### RedisModel
 
@@ -313,15 +314,15 @@ O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da 
 
 ### Settings
 
-**Settings** é a classe usada para configurar e obter configurações gerais sobre conexões e outras. Veja mais sobre ela em **[Settings](./Settings.md "Veja mais sobre Settings")**.
+**Settings** é a classe usada para configurar e obter configurações gerais sobre conexões e outras. Veja mais sobre ela em **[Settings](./settings.md "Veja mais sobre Settings")**.
 
 ### Getter
 
-**Getter** é a classe retornada ao fazer uma consulta com **RedisConnect**. Ela agrupa o retorno de mais de um modelo e permite consultas personalizadas. Veja mais sobre ela em **[Getter](./Getter.md "Veja mais sobre Getter")**.
+**Getter** é a classe retornada ao fazer uma consulta com **RedisConnect**. Ela agrupa o retorno de mais de um modelo e permite consultas personalizadas. Veja mais sobre ela em **[Getter](./getter.md "Veja mais sobre Getter")**.
 
 ### Exceptions
 
-O **RedisOKM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./Exceptions.md "Veja mais sobre Exceptions")**.
+O **RedisOKM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./exceptions.md "Veja mais sobre Exceptions")**.
 
 ### Licença
 

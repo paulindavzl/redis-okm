@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from ..core import _model
-from ..exceptions.getter_model_exceptions import *
+from . import _model
+from ..exceptions.getter_exceptions import *
 
 
 class Getter:

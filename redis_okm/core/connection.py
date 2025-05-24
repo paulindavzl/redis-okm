@@ -7,7 +7,7 @@ from typing import Any
 
 from ..core import _model
 from .configure import Settings
-from ..models.getter_model import Getter
+from .getter import Getter
 from ..exceptions.connection_exceptions import *
 
 

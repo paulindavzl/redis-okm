@@ -1,6 +1,6 @@
 import pytest
 
-from redis_okm.models.getter_model import Getter
+from redis_okm.core.getter import Getter
 from redis_okm.core.connection import RedisConnect
 
 from redis_okm_tests.conftest import TestModel

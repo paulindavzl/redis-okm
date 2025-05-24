@@ -1,8 +1,8 @@
 import re
 import pytest
 
-from redis_okm.models.getter_model import Getter
-from redis_okm.exceptions.getter_model_exceptions import *
+from redis_okm.core.getter import Getter
+from redis_okm.exceptions.getter_exceptions import *
 
 from redis_okm_tests.conftest import TestModel, RedisModel
 

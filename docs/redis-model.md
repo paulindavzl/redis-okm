@@ -154,23 +154,23 @@ Veja também outras documentações úteis para trabalhar com **RedisOKM:**
 
 ### Boas práticas
 
-O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da biblioteca. Veja mais em **[Boas Práticas](./BoasPráticas.md "Veja mais sobre Boas Práticas.").**
+O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da biblioteca. Veja mais em **[Boas Práticas](./good-practices.md "Veja mais sobre Boas Práticas.").**
 
 ### RedisConnect
 
-**RedisConnect** é a classe que se conecta de fato com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**. Veja mais sobre ela em **[RedisConnect](./RedisConnect.md "Veja mais sobre RedisConnect")**.
+**RedisConnect** é a classe que se conecta de fato com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**. Veja mais sobre ela em **[RedisConnect](./redis-connect.md "Veja mais sobre RedisConnect")**.
 
 ### Settings
 
-**Settings** é a classe usada para configurar e obter configurações gerais sobre conexões e outras. Veja mais sobre ela em **[Settings](./Settings.md "Veja mais sobre Settings")**.
+**Settings** é a classe usada para configurar e obter configurações gerais sobre conexões e outras. Veja mais sobre ela em **[Settings](./settings.md "Veja mais sobre Settings")**.
 
 ### Getter
 
-**Getter** é a classe retornada ao fazer uma consulta com **[RedisConnect](#RedisConnect "Veja mais sobre RedisConnect")**. Ela agrupa o retorno de mais de um modelo e permite consultas personalizadas. Veja mais sobre ela em **[Getter](./Getter.md "Veja mais sobre Getter")**.
+**Getter** é a classe retornada ao fazer uma consulta com **[RedisConnect](#RedisConnect "Veja mais sobre RedisConnect")**. Ela agrupa o retorno de mais de um modelo e permite consultas personalizadas. Veja mais sobre ela em **[Getter](./getter.md "Veja mais sobre Getter")**.
 
 ### Exceptions
 
-O **RedisOKM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./Exceptions.md "Veja mais sobre Exceptions")**.
+O **RedisOKM** possui exceções personalizadas. Veja mais informações em **[Exceptions](./exceptions.md "Veja mais sobre Exceptions")**.
 
 ### Licença
 

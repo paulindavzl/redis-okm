@@ -27,7 +27,7 @@ Um **modelo** no **RedisOKM** representa uma tabela, com cada instância represe
 Por padrão, um **modelo** já vem com alguns atributos e definições. Isso ajuda a simplificar a estruturação e poupar tempo, alterando-os somente quando necessário:
 
 ```python
-from redis_okm import RedisModel
+from redis_okm.tools import RedisModel
 
 
 class ExampleModel(RedisModel):
@@ -60,7 +60,7 @@ class ExampleModel(RedisModel):
 O **RedisOKM** possui um sistema bem simples de chaves estrangeiras:
 
 ```python
-from redis_okm import RedisModel, RedisConnect
+from redis_okm.tools import RedisModel, RedisConnect
 
 
 class UserModel(RedisModel):

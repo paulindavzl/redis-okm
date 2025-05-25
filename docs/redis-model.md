@@ -41,7 +41,7 @@ class ExampleModel(RedisModel):
 	__tablename__ = None # informa o nome do modelo para registro (caso não informado será o nome da classe em minúsculo - examplemodel)
 ```
 
-> ⚠️ **Atenção:** O **ID** do modelo deve ser `int` ou `str`, caso contrário ocorrerá um **[erro](./Exceptions "RedisModelTypeValueException").**
+> ⚠️ **Atenção:** O **ID** do modelo deve ser `int` ou `str`, caso contrário ocorrerá um **[erro](./Exceptions "redis-modelypeValueException").**
 >
 > Caso o **ID** seja informado por `__idname__`, não é necessário atribuí-lo na estrutura do modelo:
 

@@ -415,7 +415,7 @@ O **RedisOKM** possui uma seção que **boas práticas** para melhorar o uso da 
 
 ### RedisModel
 
-**RedisModel** é a classe que todo modelo de **RedisOKM** deve herdar. Veja mais sobre em **[RedisModel](./docs/RedisModelt.md "Veja mais sobre RedisModel")**.
+**RedisModel** é a classe que todo modelo de **RedisOKM** deve herdar. Veja mais sobre em **[RedisModel](./docs/redis-model.md "Veja mais sobre RedisModel")**.
 
 ### Settings
 

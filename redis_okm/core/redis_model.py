@@ -1,5 +1,4 @@
 from __future__ import annotations
-import hashlib
 from types import MemberDescriptorType
 
 from .. import settings
@@ -148,10 +147,14 @@ class RedisModel:
                     fk_model: type[RedisModel] = self.__foreign_keys__[ref]["model"] # obtém o modelo da chave estrangeira
                     class Return(fk_model):
                         pass
-
-                    typ_id = str if self.__autoid__ else ann[fk_model.__idname__]
-                    id = typ_id(attributes.pop(ref))
-                    f_id = {fk_model.__idname__:id} # filtro para id
+                    
+                    fk_idname = fk_model.__idname__
+                    id = attributes.pop(ref)
+                    if type(id) == fk_model:
+                        id = getattr(id, fk_idname)
+                    typ_id = str if self.__autoid__ else ann[fk_idname]
+                    id = typ_id(id)
+                    f_id = {fk_idname:id} # filtro para id
 
                     if not RedisConnect.get(fk_model).filter_by(**f_id):
                         raise RedisModelForeignKeyException(f'{cls_name}: There is no record for foreign key "{ref}" ({fk_model.__name__}) with ID {id if isinstance(id, int) else f"{id}"}!')

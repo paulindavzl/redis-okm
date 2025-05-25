@@ -80,7 +80,7 @@ class OrderModel(RedisModel):
 
 	order_id: int
 	user: UserModel # chave estrangeira
-	elements: str
+	elements: dict
 ```
 
 Neste exemplo, temos um modelo que representa um usuário e outro que representa um pedido. **Pedido** possui uma chave `user` que referencia o **usuário** que realizou o pedido. Você define a chave estrangeira indica o **modelo** de referência.
@@ -92,7 +92,7 @@ Neste exemplo, temos um modelo que representa um usuário e outro que representa
 Para instanciar um modelo que usar chave estrangeira, você precisa indicar o **ID** do modelo de referência e este precisa estar registrado:
 
 ```python
-new_order = OrderModel(user=0, elements=...) # o pedido será registrado referenciando o registro do usuário com ID 0
+new_order = OrderModel(user=0, elements={...}) # o pedido será registrado referenciando o registro do usuário com ID 0
 RedisConnect.add(new_order)
 
 # caso não possua registro com este ID, um erro será levantado!
@@ -133,6 +133,17 @@ class OrderModel(RedisModel):
 
 # cascade: quando o registro referenciado (user) for apagado, os registros que o referenciam (OrderModel) também serão apagados
 # restrict: impede que o registro de product seja apagado enquanto existir um registro de OrderModel
+```
+
+Você também pode usar uma instância da chave estrangeira ao instanciar um modelo que o a referencia:
+
+```python
+...
+
+user = UserModel(name="paulindavzl", ...)
+new_order = OrderModel(user=user, elements={...}) 
+
+# para indicar a chave estrangeira, foi usada uma instância do modelo referenciado (user - UserModel)
 ```
 
 ### Regras

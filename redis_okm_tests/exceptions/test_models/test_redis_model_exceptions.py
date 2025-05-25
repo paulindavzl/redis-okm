@@ -38,11 +38,11 @@ def test__exceptions__redis_model__type_value_exception():
         attr2: int
 
     expected1 = re.escape("TestModel1: attr2 expected a possible int value, but received a str (impossible) value!")
-    with pytest.raises(redis-modelypeValueException, match=expected1):
+    with pytest.raises(RedisModelTypeValueException, match=expected1):
         TestModel1(attr2="impossible")
 
     expected2 = re.escape("TestModel2: The attr1 must be of type int (integer) or str (string). attr1: float")
-    with pytest.raises(redis-modelypeValueException, match=expected2):
+    with pytest.raises(RedisModelTypeValueException, match=expected2):
         class TestModel2(RedisModel):
             __test__ = False
             __db__ = "tests"
@@ -51,7 +51,7 @@ def test__exceptions__redis_model__type_value_exception():
             attr2: str
 
     expected3 = re.escape('TestModel3: Divergence in the type of the attribute "attr2". expected: "dict" - received: "list"')
-    with pytest.raises(redis-modelypeValueException, match=expected3):
+    with pytest.raises(RedisModelTypeValueException, match=expected3):
         class TestModel3(RedisModel):
             __db__ = "tests"
             __testing__ = False

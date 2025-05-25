@@ -25,11 +25,6 @@ class Getter:
 
 
     @property
-    def list(self) -> list:
-        return self._getters
-
-
-    @property
     def length(self) -> int:
         """
         retorna a quantidade de modelos armazenados

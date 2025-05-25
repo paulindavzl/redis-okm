@@ -162,7 +162,8 @@ class Settings:
             },
             "dbnames": {
                 "tests": 15
-            }
+            },
+            "others": {}
         }
     
         with open(self.__configure_path__, "w") as file:
@@ -188,7 +189,7 @@ class Settings:
             '''
             Para nomear um índice use: 
                 Settings().set_config(dbname="name:index") ou 
-                Settings().set_config(dbnames=["name1:index", "name2:index"])
+                Settings().set_config(dbname=["name1:index", "name2:index"])
             '''
 
         Veja mais informações no [**GitHub**](https://github.com/paulindavzl/redis-okm "GitHub RedisOKM")
@@ -216,11 +217,10 @@ class Settings:
             # existe um configuração especial, nomear índices de bancos de dados
 
             settings.set_config(dbname="name:index") ou 
-            settings.set_config(dbnames=["name1:index", "name2:index", ...])
+            settings.set_config(dbname=["name1:index", "name2:index", ...])
 
             '''
             Note:
-                "dbname" e "dbnames" dão no mesmo, não são diferenciados
                 "name" represente o nome do índice e "index" representa o índice. ":" representa o sinal de "="
 
                 settings.set_config(dbname="tests:15") - tests já vem nomeado por padrão, representando índice 15
@@ -234,7 +234,6 @@ class Settings:
         """
         local_config = {
             "dbname": "dbnames",
-            "dbnames": "dbnames",
             "separator": "structure",
             "prefix": "structure",
             "max_connections": "pools",
@@ -254,7 +253,7 @@ class Settings:
         for config, value in configs.items():
             if config in local_config:
                 local = local_config[config]
-                if config == "dbname" or config == "dbnames":
+                if config == "dbname":
                     values = [value] if not isinstance(value, list) else value
                     for v in values:
                         if not ":" in v:
@@ -273,7 +272,7 @@ class Settings:
                         settings[local][config] = value
                 settings[local][config] = value
             else:
-                settings[config] = value
+                settings["others"][config] = value
 
         with open(self.__configure_path__, "w") as file:
             json.dump(settings, file, indent=4)

@@ -29,7 +29,7 @@ def test__settings__set__config(test_settings: Settings):
 def test__settings__get_db(test_settings: Settings):
     assert test_settings.get_db("tests") == 15
 
-    test_settings.set_config(dbnames=["tests:14", "tests1:0"], edit_dbname=True)
+    test_settings.set_config(dbname=["tests:14", "tests1:0"], edit_dbname=True)
 
     assert test_settings.get_db("tests1") == 0
     assert test_settings.get_db("tests") == 14

@@ -173,7 +173,7 @@ class RedisModel:
                 if attr not in ann:
                     raise RedisModelAttributeException(f'{cls_name} does not have "{attr}" attribute!')
                 elif attr.startswith("__") and attr.endswith("__"):
-                    raise RedisModelInvalidNomenclatureException(f'{cls_name}: Cannot set attributes that start and end with "__" ({attr})!')
+                    raise RedisModelAttributeException(f'{cls_name}: Cannot set attributes that start and end with "__" ({attr})!')
                       
                 typ: type = ann[attr]
                 if typ.__base__ == RedisModel:

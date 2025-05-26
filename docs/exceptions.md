@@ -6,19 +6,18 @@ O **RedisOKM** possui várias exceções personalizadas para facilitar o **Debug
 
 Estas são as exceções levantadas por **[RedisModel](./redis-model.md)**:
 
-
 ### RedisModelAttributeException
 
 Este erro pode acontecer de três formas:
 
-    - Quando o usuário não define um banco de dados ao estruturar um modelo (`__db__`):
+    - Quando o usuário não define um banco de dados ao estruturar um **[modelo](./redis-model.md#o-que-é-um-modelo)** (`__db__`):
 
     ```sh
     # exemplo de erro
     RedisModelAttributeException: 'Model: Specify the database using __db__ when structuring the model'
     ```
 
-    Para evitá-la, adicione `__db__` na estrutura do modelo:
+    Para evitá-la, adicione `__db__` na estrutura do **[modelo](./redis-model.md#o-que-é-um-modelo)**:
 
     ```python
     class Model(RedisModel):
@@ -26,7 +25,7 @@ Este erro pode acontecer de três formas:
         ...
     ```
 
-    - Quando o usuário tenta acessar/definir um atributo que não existe no modelo:
+    - Quando o usuário tenta acessar/definir um atributo que não existe no **[modelo](./redis-model.md#o-que-é-um-modelo)**:
 
     ```sh
     # exemplo de erro
@@ -72,7 +71,7 @@ Este erro pode acontecer de três formas:
     )
     ```
 
-    > Este erro em específico (por este motivo) não costuma acontecer, já que geraria o erro: `RedisModelAttributeException: Model does not have "invalid" attribute!`
+    > ⚠️ **Atenção:** Este erro em específico (por este motivo) não costuma acontecer, já que antes geraria o erro: `RedisModelAttributeException: Model does not have "invalid" attribute!`
 
     - Quando o usuário define `__action__` com um valor que não é um dicionário (dict):
 
@@ -90,18 +89,18 @@ Este erro pode acontecer de três formas:
         ...
     ```
 
-    > `__action__` só deve ser definido em caso de uso de chaves estrangeiras!
+    > ⚠️ **Atenção**: `__action__` só deve ser definido em caso de uso de **[chaves estrangeiras](./redis-model.md#chave-estrangeira)**!
 
 ### RedisModelInvalidNomenclatureException
 
-Este erro ocorre quando o usuário tenta definir um atributo iniciado e finalizado com **dunder** (__) na estrutura do modelo e que já não seja esperado:
+Este erro ocorre quando o usuário tenta definir um atributo iniciado e finalizado com **dunder** (__) na estrutura do **[modelo](./redis-model.md#o-que-é-um-modelo)** e que já não seja esperado:
 
 ```sh
 # exemplo de erro
 RedisModelInvalidNomenclatureException: 'Model: Cannot set attributes that start and end with "__" (__invalid__)!'
 ```
 
-Este erro pode ser evitado com o usuário não tentando criar atributos para o modelo usando **dunder** (__):
+Este erro pode ser evitado com o usuário não tentando criar atributos para o **[modelo](./redis-model.md#o-que-é-um-modelo)** usando **dunder** (__):
 
 ```python
 class Model(RedisModel):
@@ -120,12 +119,12 @@ class Model(RedisModel):
     ...
 ```
 
-> Neste caso, todos os atributos de **__db__** até **__tablename__** foram permitidos porque já fazem parte do modelo por padrão, já **__invalid__** seria um atributo novo, que poderia gerar conflitos!
+> 🔔 **Note:** Neste caso, todos os atributos de **__db__** até **__tablename__** foram permitidos porque já fazem parte do modelo por padrão, já **__invalid__** seria um atributo novo, que poderia gerar conflitos! Veja mais sobre a **[estrutura padrão de um modelo](./redis-model.md#estrutura-básica-de-um-modelo)**.
 
 
 ### RedisModelForeignKeyException
 
-Este erro está relacionado à qualquer problema relacionado à **chaves estrangeiras** quando um modelo é instanciado. Ele pode ocorrer das seguintes formas:
+Este erro está relacionado à qualquer problema relacionado à **[chaves estrangeiras](./redis-model.md#chave-estrangeira)** quando um **[modelo](./redis-model.md#o-que-é-um-modelo)** é instanciado. Ele pode ocorrer das seguintes formas:
 
     - Quando o usuário tenta definir uma chave estrangeira onde o modelo referencia a si mesmo:
 
@@ -134,7 +133,7 @@ Este erro está relacionado à qualquer problema relacionado à **chaves estrang
     RedisModelForeignKeyException: 'Model: You cannot define a foreign key in a model of itself (fk2)!'
     ```
 
-    Não tente referenciar uma chave estrangeira no seu próprio modelo para que este erro não ocorra:
+    Não tente referenciar uma **[chaves estrangeiras](./redis-model.md#chave-estrangeira)** no seu próprio **[modelo](./redis-model.md#o-que-é-um-modelo)** para que este erro não ocorra:
 
     ```python
     class OtherModel(RedisModel):
@@ -149,7 +148,7 @@ Este erro está relacionado à qualquer problema relacionado à **chaves estrang
         fk2: Model # gerará um erro
     ```
 
-    - Quando os modelos não possuem as mesma informações de conexão com o servidor **Redis**:
+    - Quando os **[modelos](./redis-model.md#o-que-é-um-modelo)** não possuem as mesma informações de conexão com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**:
 
     ```python
     from redis_okm.tools import Settings
@@ -197,16 +196,16 @@ Este erro está relacionado à qualquer problema relacionado à **chaves estrang
         fk: OtherModel
     ```
 
-    > Não é obrigatório declarar `__settings__`. O **RedisModel** já lida com isso e usa instância global de **Settings**!
+    > 💡 **Sugestão:** Sempre que possível, use a instância global de **[Settings](./settings.md)** e não defina-a na **[estrutura do modelo](./redis-model.md#estrutura-básica-de-um-modelo)**, **[RedisModel](./redis-model.md)** já lida com ela por padrão!
 
-    - Quando o usuário tenta definir `__action__` sem definir uma chave estrangeira:
+    - Quando o usuário tenta definir `__action__` sem definir uma **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
 
     ```sh
     # exemplo de erro
     RedisModelForeignKeyException: 'Model: Define foreign key "fk" to define an action!'
     ```
 
-    Sempre definir `__action__`, defina também a chave estrangeira:
+    Sempre definir `__action__`, defina também a **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
 
     ```python
     class OtherModel(RedisModel):
@@ -221,16 +220,16 @@ Este erro está relacionado à qualquer problema relacionado à **chaves estrang
         fk: OtherModel # se não definir a chave estrangeira, gera um erro
     ```
 
-    > Para ser considerado chave estrangeira, a chave referenciada deve ser um modelo com base em **RedisModel**!
+    >  ⚠️ **Atenção:** Para ser considerado **[chave estrangeira](./redis-model.md#chave-estrangeira)**, a chave referenciada deve ser um **[modelo](./redis-model.md#o-que-é-um-modelo)** com base em **[RedisModel](./redis-model.md)**!
 
-    - Quando o usuário instancia um modelo mas não atribui nenhum valor para a chave estrangeira:
+    - Quando o usuário instancia um **[modelo](./redis-model.md#o-que-é-um-modelo) mas não atribui nenhum valor para a **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
 
     ```sh
     # exemplo de erro
     RedisModelForeignKeyException: 'Model: Set a value for the foreign key "fk".'
     ```
 
-    Sempre atribua valor para os atributos de um modelo, a menos que ele possua um valor padrão:
+    Sempre atribua valor para os atributos de um **[modelo](./redis-model.md#o-que-é-um-modelo)**, a menos que ele possua um valor padrão:
 
     ```python
     class OtherModel(RedisModel):
@@ -251,14 +250,14 @@ Este erro está relacionado à qualquer problema relacionado à **chaves estrang
     )
     ```
 
-    - Quando o usuário informa o ID de uma chave estrangeira que não possui registro:
+    - Quando o usuário informa o ID de uma **[chave estrangeira](./redis-model.md#chave-estrangeira)** que não possui registro:
 
     ```sh
     # exemplo de erro
     RedisModelForeignKeyException: 'Model: There is no record for foreign key "fk" (OtherModel) with ID 0!'
     ```
 
-    Garanta que a chave estrangeira esteja registrada antes de atribuí-la a um modelo:
+    Garanta que a **[chave estrangeira](./redis-model.md#chave-estrangeira)** esteja **[registrada](./redis-connect.md#salvar-um-registro)** antes de atribuí-la a um **[modelo](./redis-model.md#o-que-é-um-modelo)**:
 
     ```python
     from redis_okm.tools import RedisModel, RedisConnect
@@ -309,7 +308,7 @@ Este erro está relacionado à qualquer problema relacionado à **chaves estrang
         fk: OtherModel
     ```
 
-    > As ações podem ser **"cascade"** ou **"restrict""**!
+    > 🔔 **Saiba:** As ações podem ser **"cascade"** ou **"restrict"**!
 
 ### RedisModelTypeValueException
 
@@ -322,7 +321,7 @@ Este erro ocorre quando um atributo recebe um valor com um tipo inesperado. Ele 
     RedisModelTypeValueException: 'Model: The id must be of type int (integer) or str (string). id: list'
     ```
 
-    O ID de um modelo sempre deve ser `int` ou `str`:
+    O ID de um **[modelo](./redis-model.md#o-que-é-um-modelo)** sempre deve ser `int` ou `str`:
 
     ```python
     class Model(RedisModel):
@@ -340,7 +339,7 @@ Este erro ocorre quando um atributo recebe um valor com um tipo inesperado. Ele 
     RedisModelTypeValueException: 'Model: Divergence in the type of the attribute "wishes". expected: "list" - received: "dict"'
     ```
 
-    Sempre informe o valor com tipo definido na estrutura do modelo:
+    Sempre informe o valor com tipo definido na estrutura do **[modelo](./redis-model.md#o-que-é-um-modelo)**:
 
     ```python
     class Model(RedisModel):

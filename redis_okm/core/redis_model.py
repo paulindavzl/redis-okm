@@ -41,7 +41,7 @@ class RedisModel:
         action = getattr(cls, "__action__", None)
 
         if db is None:
-            raise RedisModelDBException(f"{cls_name}: Specify the database using __db__ when structuring the model")
+            raise RedisModelAttributeException(f"{cls_name}: Specify the database using __db__ when structuring the model")
         elif isinstance(db, str):
             db = sett.get_db(db)
 
@@ -185,7 +185,6 @@ class RedisModel:
                             raise RedisModelTypeValueException(f'{cls_name}: Divergence in the type of the attribute "{attr}". expected: "{typ.__name__}" - received: "{type(value).__name__}"')
                     attrs[attr] = typ(value) if value != "__await_autoid__" else value
                 except ValueError as e:
-                    print(e)
                     raise RedisModelTypeValueException(f"{cls_name}: {attr} expected a possible {typ.__name__} value, but received a {type(value).__name__} ({value}) value!")
                 except Exception as e:
                     raise e

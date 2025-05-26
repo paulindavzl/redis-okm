@@ -6,16 +6,6 @@ from redis_okm.tools import RedisModel, Settings
 from redis_okm.exceptions.redis_model_exceptions import *
 
 
-def test__exceptions__redis_model__id_exception():
-    expected = re.escape("Specify the database using __db__ when structuring the model")
-    with pytest.raises(RedisModelDBException, match=expected):
-        class TestModel(RedisModel):
-            __test__ = False
-
-            attr1: str
-            attr2: int
-
-
 def test__exceptions__redis_model__attribute_exception():
     class TestModel(RedisModel):
         __test__ = False
@@ -44,6 +34,14 @@ def test__exceptions__redis_model__attribute_exception():
             __action__ = "error"
 
         test = TestModel()
+
+    expected5 = re.escape("TestModel2: Specify the database using __db__ when structuring the model")
+    with pytest.raises(RedisModelAttributeException, match=expected5):
+        class TestModel2(RedisModel):
+            __test__ = False
+
+            attr1: str
+            attr2: int
 
 
 def test__exceptions__redis_model__type_value_exception():

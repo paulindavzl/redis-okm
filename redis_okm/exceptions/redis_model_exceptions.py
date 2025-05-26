@@ -1,9 +1,3 @@
-class RedisModelDBException(Exception):
-    """
-    Database not informed.
-    """
-
-
 class RedisModelAttributeException(Exception):
     """
     Non-existent attribute in the Model.

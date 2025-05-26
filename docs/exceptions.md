@@ -10,7 +10,7 @@ Estas são as exceções levantadas por **[RedisModel](./redis-model.md)**:
 
 Este erro pode acontecer de três formas:
 
-    - Quando o usuário não define um banco de dados ao estruturar um **[modelo](./redis-model.md#o-que-é-um-modelo)** (`__db__`):
+- Quando o usuário não define um banco de dados ao estruturar um **[modelo](./redis-model.md#o-que-é-um-modelo)** (`__db__`):
 
     ```sh
     # exemplo de erro
@@ -25,7 +25,7 @@ Este erro pode acontecer de três formas:
         ...
     ```
 
-    - Quando o usuário tenta acessar/definir um atributo que não existe no **[modelo](./redis-model.md#o-que-é-um-modelo)**:
+- Quando o usuário tenta acessar/definir um atributo que não existe no **[modelo](./redis-model.md#o-que-é-um-modelo)**:
 
     ```sh
     # exemplo de erro
@@ -48,7 +48,7 @@ Este erro pode acontecer de três formas:
     )
     ```
 
-    - Quando o usuário tenta definir um **"atributo especial"** (iniciados com **dunder** - **__**). Isso ocorre para que não haja conflitos na atribuição de valores aos atributos:
+-  Quando o usuário tenta definir um **"atributo especial"** (iniciados com **dunder** - **__**). Isso ocorre para que não haja conflitos na atribuição de valores aos atributos:
 
     ```sh
     # exemplo de erro
@@ -73,7 +73,7 @@ Este erro pode acontecer de três formas:
 
     > ⚠️ **Atenção:** Este erro em específico (por este motivo) não costuma acontecer, já que antes geraria o erro: `RedisModelAttributeException: Model does not have "invalid" attribute!`
 
-    - Quando o usuário define `__action__` com um valor que não é um dicionário (dict):
+-  Quando o usuário define `__action__` com um valor que não é um dicionário (dict):
 
     ```sh
     # exemplo de erro
@@ -126,7 +126,7 @@ class Model(RedisModel):
 
 Este erro está relacionado à qualquer problema relacionado à **[chaves estrangeiras](./redis-model.md#chave-estrangeira)** quando um **[modelo](./redis-model.md#o-que-é-um-modelo)** é instanciado. Ele pode ocorrer das seguintes formas:
 
-    - Quando o usuário tenta definir uma chave estrangeira onde o modelo referencia a si mesmo:
+-  Quando o usuário tenta definir uma chave estrangeira onde o modelo referencia a si mesmo:
 
     ```sh
     # exemplo de erro
@@ -148,7 +148,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
         fk2: Model # gerará um erro
     ```
 
-    - Quando os **[modelos](./redis-model.md#o-que-é-um-modelo)** não possuem as mesma informações de conexão com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**:
+-  Quando os **[modelos](./redis-model.md#o-que-é-um-modelo)** não possuem as mesma informações de conexão com o servidor **[Redis](https://redis.io/ "Redis - The Real-time Data Platform")**:
 
     ```python
     from redis_okm.tools import Settings
@@ -198,7 +198,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
 
     > 💡 **Sugestão:** Sempre que possível, use a instância global de **[Settings](./settings.md)** e não defina-a na **[estrutura do modelo](./redis-model.md#estrutura-básica-de-um-modelo)**, **[RedisModel](./redis-model.md)** já lida com ela por padrão!
 
-    - Quando o usuário tenta definir `__action__` sem definir uma **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
+-  Quando o usuário tenta definir `__action__` sem definir uma **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
 
     ```sh
     # exemplo de erro
@@ -222,7 +222,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
 
     >  ⚠️ **Atenção:** Para ser considerado **[chave estrangeira](./redis-model.md#chave-estrangeira)**, a chave referenciada deve ser um **[modelo](./redis-model.md#o-que-é-um-modelo)** com base em **[RedisModel](./redis-model.md)**!
 
-    - Quando o usuário instancia um **[modelo](./redis-model.md#o-que-é-um-modelo) mas não atribui nenhum valor para a **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
+-  Quando o usuário instancia um **[modelo](./redis-model.md#o-que-é-um-modelo) mas não atribui nenhum valor para a **[chave estrangeira](./redis-model.md#chave-estrangeira)**:
 
     ```sh
     # exemplo de erro
@@ -250,7 +250,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
     )
     ```
 
-    - Quando o usuário informa o ID de uma **[chave estrangeira](./redis-model.md#chave-estrangeira)** que não possui registro:
+-  Quando o usuário informa o ID de uma **[chave estrangeira](./redis-model.md#chave-estrangeira)** que não possui registro:
 
     ```sh
     # exemplo de erro
@@ -286,7 +286,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
     )
     ```
 
-    - Quando o usuário define uma chave estrangeira mas não a adiciona em `__action__`:
+-  Quando o usuário define uma chave estrangeira mas não a adiciona em `__action__`:
 
     ```sh
     # exemplo de erro
@@ -314,7 +314,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
 
 Este erro ocorre quando um atributo recebe um valor com um tipo inesperado. Ele pode ocorrer nas seguintes situações:
 
-    - Quando o usuário define o **ID** com um tipo que não seja `int` ou `str`:
+-  Quando o usuário define o **ID** com um tipo que não seja `int` ou `str`:
 
     ```sh
     # exemplo de erro
@@ -332,7 +332,7 @@ Este erro ocorre quando um atributo recebe um valor com um tipo inesperado. Ele 
         ...
     ```
 
-    - Quando o usuário define um tipo `list`, `dict` ou `tuple`, mas ao atribuir um valor, informa um tipo diferente:
+-  Quando o usuário define um tipo `list`, `dict` ou `tuple`, mas ao atribuir um valor, informa um tipo diferente:
 
     ```sh
     # exemplo de erro
@@ -357,7 +357,7 @@ Este erro ocorre quando um atributo recebe um valor com um tipo inesperado. Ele 
 
     > `int` e `str` não possuem tanta restrição, desde que possam ser convertidos para o tipo esperado. Porém, `dict`, `list` e `tuple` aceitam somente o tipo que lhes foi definido!
 
-    - Quando um atributo espera um tipo e recebe um valor que não pode ser convertido (geralmente `float` e `int`):
+-  Quando um atributo espera um tipo e recebe um valor que não pode ser convertido (geralmente `float` e `int`):
 
     ```sh
     # exemplo de erro

@@ -11,7 +11,7 @@ class RedisModel:
     """
     Base para todos os modelos em RedisOKM
     """
-    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "status"]
+    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__"]
 
     def _set_attributes(cls, ann: dict[str|type]):
         cls_name = cls.__name__ if callable(cls) else type(cls).__name__
@@ -136,7 +136,7 @@ class RedisModel:
             if self.__action__ and _set_fk:
                 # garante que as ações das chaves estrangeiras são dict
                 if not isinstance(self.__action__, dict):
-                    raise RedisModelForeignKeyException(f"{cls_name}: __action__ must be dict. __action__: {self.__action__} ({type(self.__action__).__name__})")
+                    raise RedisModelAttributeException(f"{cls_name}: __action__ must be dict. __action__: {self.__action__} ({type(self.__action__).__name__})")
                 
                 for ref in self.__action__.keys():
                     if not ref in self.__foreign_keys__: 

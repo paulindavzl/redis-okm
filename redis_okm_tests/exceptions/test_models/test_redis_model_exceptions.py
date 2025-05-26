@@ -33,6 +33,14 @@ def test__exceptions__redis_model__attribute_exception():
         TestModel.__annotations__["__error__"] = str
         TestModel(__error__ = "error")
 
+    expected3 = re.escape("TestModel: __action__ must be dict. __action__: error (str)")
+    with pytest.raises(RedisModelAttributeException, match=expected3):
+        class TestModel(RedisModel):
+            __db__ = "tests"
+            __action__ = "error"
+
+        test = TestModel()
+
 
 def test__exceptions__redis_model__type_value_exception():
     class TestModel1(RedisModel):
@@ -88,14 +96,6 @@ def test__exceptions__redis_model__invalid_nomeclature_exception():
 
 
 def test__exceptions__redis_model__foreign_key_exception():
-    expected1 = re.escape("TestModel: __action__ must be dict. __action__: error (str)")
-    with pytest.raises(RedisModelForeignKeyException, match=expected1):
-        class TestModel(RedisModel):
-            __db__ = "tests"
-            __action__ = "error"
-
-        test = TestModel()
-
     expected2 = re.escape('TestModel: Define foreign key "fk" to define an action!')
     with pytest.raises(RedisModelForeignKeyException, match=expected2):
         class TestModel(RedisModel):

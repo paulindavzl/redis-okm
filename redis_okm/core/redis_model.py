@@ -200,7 +200,7 @@ class RedisModel:
                 if not str(attr).startswith("__") and attr not in attrs and attr not in self.__foreign_keys__:
                     name = type(self)
                     if not hasattr(name, attr):
-                        raise RedisModelNoValueException(f"{cls_name}: {attr} must receive a value!")
+                        raise RedisModelAttributeException(f"{cls_name}: {attr} must receive a value!")
                     value = getattr(name, attr)
                     if callable(value):
                         value = value()

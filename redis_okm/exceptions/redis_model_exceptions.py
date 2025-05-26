@@ -16,12 +16,6 @@ class RedisModelTypeValueException(Exception):
     """
 
 
-class RedisModelNoValueException(Exception):
-    """
-    The attribute did not receive any value.
-    """
-
-
 class RedisModelForeignKeyException(Exception):
     """
     Foreign Key error

@@ -33,6 +33,10 @@ def test__exceptions__redis_model__attribute_exception():
         TestModel.__annotations__["__error__"] = str
         TestModel(__error__ = "error")
 
+    expected4 = re.escape("TestModel: attr2 must receive a value!")
+    with pytest.raises(RedisModelAttributeException, match=expected4):
+        TestModel()
+
     expected3 = re.escape("TestModel: __action__ must be dict. __action__: error (str)")
     with pytest.raises(RedisModelAttributeException, match=expected3):
         class TestModel(RedisModel):
@@ -75,19 +79,6 @@ def test__exceptions__redis_model__type_value_exception():
         model = TestModel3(attr2=[])
 
     
-def test__exceptions__redis_model__no_value_exception():
-    class TestModel(RedisModel):
-        __test__ = False
-        __db__ = "tests"
-        __idname__ = "testID"
-
-        attr1: str
-
-    expected = re.escape("attr1 must receive a value!")
-    with pytest.raises(RedisModelNoValueException, match=expected):
-        TestModel()
-    
-
 def test__exceptions__redis_model__invalid_nomeclature_exception():
     expected = re.escape('TestModel: Cannot set attributes that start and end with "__" (__error__)!')
     with  pytest.raises(RedisModelInvalidNomenclatureException, match=expected):

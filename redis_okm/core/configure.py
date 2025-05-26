@@ -162,8 +162,7 @@ class Settings:
             },
             "dbnames": {
                 "tests": 15
-            },
-            "others": {}
+            }
         }
     
         with open(self.__configure_path__, "w") as file:
@@ -272,7 +271,7 @@ class Settings:
                         settings[local][config] = value
                 settings[local][config] = value
             else:
-                settings["others"][config] = value
+                settings[config] = value
 
         with open(self.__configure_path__, "w") as file:
             json.dump(settings, file, indent=4)

@@ -175,7 +175,7 @@ Este erro está relacionado à qualquer problema relacionado à **[chaves estran
 
     ```sh
     # exemplo de erro
-    RedisModelForeignKeyException: 'Order: The connection information (HOST, PORT and PASSWORD) of the reference model (OtherModel) and the referenced model (Model) must be the same. Differences: HOST, PORT, PASSWORD'
+    RedisModelForeignKeyException: 'The connection information (HOST, PORT and PASSWORD) of the reference model (OtherModel) and the referenced model (Model) must be the same. Differences: HOST, PORT, PASSWORD'
     ```
 
     Certifique-se de os modelos referenciados e os que referenciam-os possuam as mesmas informações de conexão, de preferenciam, que usem a mesma instância em `__settings__`:

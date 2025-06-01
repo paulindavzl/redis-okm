@@ -1,28 +1,28 @@
-class SettingsEnvfileNotFoundException(FileNotFoundError):
+class SettingsEnvfileNotFoundException(Exception):
     """
     Envfile not found.
     """
 
 
-class SettingsEnvkeyException(EnvironmentError):
+class SettingsEnvkeyException(Exception):
     """
     The key does not exist in the Envfile.
     """
 
 
-class SettingsUnknownDBException(KeyError):
+class SettingsUnknownDBException(Exception):
     """
     The searched db does not exist.
     """
 
 
-class SettingsExistingDBException(ValueError):
+class SettingsExistingDBException(Exception):
     """
     The database is already named and cannot be overwritten.
     """
 
 
-class SettingsInvalidDBNameException(ValueError):
+class SettingsInvalidDBNameException(Exception):
     """
     Invalid database index definition.
     """

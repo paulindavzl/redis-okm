@@ -33,10 +33,20 @@ git clone git@github.com:paulindavzl/redis-okm.git
 poetry install
 ```
 
-Ou **instale pelo [PyPI](https://pypi.org/project/redis-okm-py/ "RedisOKM"):**
+---
+
+**Instale pelo `pip`:**
 
 ```bash
-pip install redis-okm
+pip install git+ssh://git@github.com/paulindavzl/redis-okm.git
+```
+
+---
+
+**Adicione no `poetry`:**
+
+```bash
+poetry add git+ssh://git@github.com/paulindavzl/redis-okm.git
 ```
 
 ---

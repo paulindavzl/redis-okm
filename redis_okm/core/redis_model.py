@@ -75,7 +75,7 @@ class RedisModel:
         for attr, value in ann.items():
             if isinstance(value, cls):
                 raise RedisModelForeignKeyException(f"{cls_name}: You cannot define a foreign key in a model of itself ({attr})!")
-            if value.__base__ is RedisModel:
+            if getattr(value, "__base__", None) is RedisModel:
                 fk_settings = value(instance=False).__settings__
                 differences = [
                     "HOST" if fk_settings.host != cls.__settings__.host else "", 

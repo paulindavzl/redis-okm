@@ -88,7 +88,7 @@ class RedisModel:
                     
                 cls.__foreign_keys__[attr] = {"model": value}
 
-        if ann[cls.__idname__] not in [int, str]:
+        if not isinstance(ann[cls.__idname__], (int, str)):
             raise RedisModelTypeValueException(f"{cls_name}: The {cls.__idname__} must be of type int (integer) or str (string). {cls.__idname__}: {ann[cls.__idname__].__name__}")
 
         if cls.__hashid__:

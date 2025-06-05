@@ -11,7 +11,7 @@ class RedisModel:
     """
     Base para todos os modelos em RedisOKM
     """
-    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__"]
+    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__", "__params__"]
 
     def _set_attributes(cls, ann: dict[str|type]):
         cls_name = cls.__name__ if callable(cls) else type(cls).__name__
@@ -39,6 +39,7 @@ class RedisModel:
         sett = getattr(cls, "__settings__", settings)
         expire = getattr(cls, "__expire__", None)
         action = getattr(cls, "__action__", None)
+        params = getattr(cls, "__params__", {})
 
         if db is None:
             raise RedisModelAttributeException(f"{cls_name}: Specify the database using __db__ when structuring the model")
@@ -70,6 +71,7 @@ class RedisModel:
         cls.to_dict = {}
         cls.__status__ = True
         cls.__key__ = "__await_identify__"
+        cls.__params__ = params
 
         cls.__foreign_keys__: dict[type, any] = {}
         for attr, value in ann.items():

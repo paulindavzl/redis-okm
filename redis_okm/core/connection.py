@@ -175,11 +175,15 @@ class RedisConnect:
             hs = hashlib.sha256(data).hexdigest()
             content["__hash__"] = hs
 
+            all_params = getattr(model, "__params__", {})
             for attr, value in content.items():
                 if callable(value):
-                    callable_value = value()
-                    setattr(model, attr, callable_value)
+                    typ: type = model.__annotations__[attr]
+                    params = all_params.get(attr)
+                    callable_value = typ(value(**params) if params else value())
+
                     content[attr] = callable_value
+                    setattr(model, attr, callable_value)
                                             
             handler.hset(name, mapping=content)
 

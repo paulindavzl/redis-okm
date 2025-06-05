@@ -176,7 +176,7 @@ class RedisModel:
                     raise RedisModelAttributeException(f'{cls_name}: Cannot set attributes that start and end with "__" ({attr})!')
                       
                 typ: type = ann[attr]
-                if typ.__base__ == RedisModel:
+                if isinstance(getattr(typ, "__base__", None), RedisModel):
                     raise RedisModelForeignKeyException(f'{cls_name}: To define the foreign key "{attr}", add an action for it in __action__')
                 
                 try:

@@ -174,6 +174,12 @@ class RedisConnect:
             data = str(model.__key__).encode("utf-8") + str(json.dumps(content)).encode("utf-8")
             hs = hashlib.sha256(data).hexdigest()
             content["__hash__"] = hs
+
+            for attr, value in content.items():
+                if callable(value):
+                    callable_value = value()
+                    setattr(model, attr, callable_value)
+                    content[attr] = callable_value
                                             
             handler.hset(name, mapping=content)
 

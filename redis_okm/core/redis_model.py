@@ -1,4 +1,3 @@
-from __future__ import annotations
 from types import MemberDescriptorType
 
 from .. import settings
@@ -203,8 +202,6 @@ class RedisModel:
                     if not hasattr(name, attr):
                         raise RedisModelAttributeException(f"{cls_name}: {attr} must receive a value!")
                     value = getattr(name, attr)
-                    if callable(value):
-                        value = value()
                     setattr(self, attr, value)
                     self.to_dict[attr] = value
             

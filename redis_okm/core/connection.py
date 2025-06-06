@@ -156,6 +156,7 @@ class RedisConnect:
 
                     content[key] = id
 
+            all_params = getattr(model, "__params__", {})
             for key, value in content.items():
                 if isinstance(value, (dict, list, tuple)):
                     typ: type = model.__annotations__[key]
@@ -163,6 +164,13 @@ class RedisConnect:
                         raise RedisConnectTypeValueException(f'{type(model).__name__}: Divergence in the type of the attribute "{key}". expected: "{typ.__name__}" - received: "{type(value).__name__}"')
                     
                     content[key] = json.dumps(value)
+                elif callable(value):
+                    typ: type = model.__class__.__annotations__[key]
+                    params = all_params.get(key)
+                    callable_value = typ(value(**params) if params else value())
+
+                    content[key] = callable_value
+                    setattr(model, key, callable_value)
 
             content = {k: str(v) for k, v in content.items()}
             setattr(model, "__key__", hashlib.sha256(
@@ -175,16 +183,6 @@ class RedisConnect:
             hs = hashlib.sha256(data).hexdigest()
             content["__hash__"] = hs
 
-            all_params = getattr(model, "__params__", {})
-            for attr, value in content.items():
-                if callable(value):
-                    typ: type = model.__annotations__[attr]
-                    params = all_params.get(attr)
-                    callable_value = typ(value(**params) if params else value())
-
-                    content[attr] = callable_value
-                    setattr(model, attr, callable_value)
-                                            
             handler.hset(name, mapping=content)
 
         if not model.__instancied__:

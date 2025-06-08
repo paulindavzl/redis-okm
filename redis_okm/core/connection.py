@@ -3,7 +3,7 @@ import json
 import redis
 import hashlib
 import fakeredis
-from typing import Any
+from typing import Any, get_origin
 
 from ..core import _model
 from .configure import Settings
@@ -159,7 +159,12 @@ class RedisConnect:
             all_params = getattr(model, "__params__", {})
             for key, value in content.items():
                 if isinstance(value, (dict, list, tuple)):
-                    typ: type = model.__annotations__[key]
+                    
+                    pseudo_type: type = model.__annotations__[key]
+                    typ: type = get_origin(pseudo_type)
+                    if not typ:
+                        typ = pseudo_type
+
                     if typ != type(value):
                         raise RedisConnectTypeValueException(f'{type(model).__name__}: Divergence in the type of the attribute "{key}". expected: "{typ.__name__}" - received: "{type(value).__name__}"')
                     

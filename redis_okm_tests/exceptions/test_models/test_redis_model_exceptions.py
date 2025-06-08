@@ -2,7 +2,7 @@ import os
 import re
 import pytest
 
-from redis_okm.tools import RedisModel, Settings
+from redis_okm.tools import RedisModel, Settings, RedisConnect
 from redis_okm.exceptions.redis_model_exceptions import *
 
 
@@ -117,16 +117,38 @@ def test__exceptions__redis_model__foreign_key_exception():
         
         test = TestModel(fk=0)
 
-    expected5 = re.escape('TestModel: To define the foreign key "fk", add an action for it in __action__')
+    expected5 = re.escape('TestModel1: To define the foreign key, add an action for it in __action__')
     with pytest.raises(RedisModelForeignKeyException, match=expected5):
-        class TestModel(RedisModel):
+        class TestModel1(RedisModel):
             __db__ = 10
             __testing__ = True
 
             attr1: str
             fk: TestModel
         
-        test = TestModel(fk=0)
+        test = TestModel1(fk=0)
+
+    expected7 = re.escape('TestModel1: To define the foreign key "fk", add an action for it in __action__')
+    with pytest.raises(RedisModelForeignKeyException, match=expected7):
+        class TestModel5(RedisModel):
+            __db__ = 10
+            __testing__ = True
+        
+            attr: str
+            attr2: str
+
+        class TestModel1(RedisModel):
+            __db__ = 10
+            __testing__ = True
+            __action__ = {"fk1": "cascade"}
+
+            attr1: str
+            fk: TestModel5
+            fk1: TestModel5
+
+        RedisConnect.add(TestModel5(attr2="test"))
+        
+        test = TestModel1(fk=0, fk1=0)
 
     expected6 = re.escape("TestFK: The connection information (HOST, PORT and PASSWORD) of the reference model (TestModel) and the referenced model (TestFK) must be the same. Differences: HOST")
     with pytest.raises(RedisModelForeignKeyException, match=expected6):

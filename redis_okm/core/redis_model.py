@@ -20,13 +20,23 @@ class RedisModel:
             if attr.startswith("__") and attr.endswith("__") and attr not in cls.__slots__:
                 raise RedisModelInvalidNomenclatureException(f'{cls_name}: Cannot set attributes that start and end with "__" ({attr})!')
         # valores padrões dos atributos
-        d = {
-            "__db__": None, "__idname__": None, "__autoid__": True, "__hashid__": False, "__testing__": False, "__tablename__": None, "__settings__": settings, "__expire__": None, "__action__": None
+        default_values = {
+            "__db__": None, 
+            "__idname__": None, 
+            "__autoid__": True, 
+            "__hashid__": False, 
+            "__testing__": False, 
+            "__tablename__": None, 
+            "__settings__": settings, 
+            "__expire__": None, 
+            "__action__": None, 
+            "__ignore__": [],
+            "__params__": {}
         }
         
         for attr in dir(cls):
-            if isinstance(getattr(cls, attr, None), MemberDescriptorType) and attr in d:
-                setattr(cls, attr, d[attr])
+            if isinstance(getattr(cls, attr, None), MemberDescriptorType) and attr in default_values:
+                setattr(cls, attr, default_values[attr])
 
         # obtém informações do modelo
         db = getattr(cls, "__db__", None)
@@ -78,18 +88,24 @@ class RedisModel:
         for attr, value in ann.items():
             if isinstance(value, cls):
                 raise RedisModelForeignKeyException(f"{cls_name}: You cannot define a foreign key in a model of itself ({attr})!")
+            
             if getattr(value, "__base__", None) is RedisModel:
                 fk_settings = value(instance=False).__settings__
+
                 differences = [
                     "HOST" if fk_settings.host != cls.__settings__.host else "", 
                     "PORT" if fk_settings.port != cls.__settings__.port else "",
                     "PASSWORD" if fk_settings.password != cls.__settings__.password else ""
                 ] 
+
                 differences = [d for d in differences if d]
                 if differences:
                     raise RedisModelForeignKeyException(f"{cls_name}: The connection information (HOST, PORT and PASSWORD) of the reference model ({value.__name__}) and the referenced model ({cls_name}) must be the same. Differences: {", ".join(differences)}")
                     
                 cls.__foreign_keys__[attr] = {"model": value}
+
+        if cls.__foreign_keys__ and not cls.__action__:
+            raise RedisModelForeignKeyException(f'{cls_name}: To define the foreign key, add an action for it in __action__')
 
         if ann[cls.__idname__] not in [str, int]:
             raise RedisModelTypeValueException(f"{cls_name}: The {cls.__idname__} must be of type int (integer) or str (string). {cls.__idname__}: {ann[cls.__idname__].__name__}")
@@ -129,6 +145,7 @@ class RedisModel:
         """
         cls_name = type(self).__name__
         _set_fk = attributes.pop("set_fk") if attributes.get("set_fk") is not None else True 
+
         for attr in self.__ignore__:
             attributes.pop(attr, None)
 
@@ -182,7 +199,7 @@ class RedisModel:
                     raise RedisModelAttributeException(f'{cls_name}: Cannot set attributes that start and end with "__" ({attr})!')
                       
                 typ: type = ann[attr]
-                if isinstance(getattr(typ, "__base__", None), RedisModel):
+                if getattr(typ, "__base__", None) == RedisModel:
                     raise RedisModelForeignKeyException(f'{cls_name}: To define the foreign key "{attr}", add an action for it in __action__')
                 
                 try:

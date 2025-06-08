@@ -10,7 +10,7 @@ class RedisModel:
     """
     Base para todos os modelos em RedisOKM
     """
-    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__", "__params__"]
+    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__", "__params__", "__ignore__"]
 
     def _set_attributes(cls, ann: dict[str|type]):
         cls_name = cls.__name__ if callable(cls) else type(cls).__name__
@@ -39,6 +39,7 @@ class RedisModel:
         expire = getattr(cls, "__expire__", None)
         action = getattr(cls, "__action__", None)
         params = getattr(cls, "__params__", {})
+        ignore = getattr(cls, "__ignore__", [])
 
         if db is None:
             raise RedisModelAttributeException(f"{cls_name}: Specify the database using __db__ when structuring the model")
@@ -71,6 +72,7 @@ class RedisModel:
         cls.__status__ = True
         cls.__key__ = "__await_identify__"
         cls.__params__ = params
+        cls.__ignore__ = ignore
 
         cls.__foreign_keys__: dict[type, any] = {}
         for attr, value in ann.items():
@@ -127,6 +129,9 @@ class RedisModel:
         """
         cls_name = type(self).__name__
         _set_fk = attributes.pop("set_fk") if attributes.get("set_fk") is not None else True 
+        for attr in self.__ignore__:
+            attributes.pop(attr, None)
+
         if not attributes.get("instance") is False:
             attrs = {}
             ann = self.__annotations__
@@ -197,7 +202,7 @@ class RedisModel:
 
             ann = self.__annotations__ # recarrega __annotations__
             for attr in ann:
-                if not str(attr).startswith("__") and attr not in attrs and attr not in self.__foreign_keys__:
+                if not str(attr).startswith("__") and attr not in attrs and attr not in self.__foreign_keys__ and not attr in self.__ignore__:
                     name = type(self)
                     if not hasattr(name, attr):
                         raise RedisModelAttributeException(f"{cls_name}: {attr} must receive a value!")

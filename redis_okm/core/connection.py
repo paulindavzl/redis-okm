@@ -253,7 +253,7 @@ class RedisConnect:
         return redis_handler.exists(name) == 1
     
 
-    @staticmethod
+    @staticmethod 
     def get(model: _model, on_corrupt: Literal["flag", "skip", "ignore", "default"]="default", _set_fk: bool=True) -> Getter:
         """
         Obtém dados do banco de dados baseado em modelos

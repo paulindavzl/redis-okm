@@ -3,7 +3,7 @@ import json
 import redis
 import hashlib
 import fakeredis
-from typing import Any, get_origin
+from typing import Any, get_origin, Literal
 
 from ..core import _model
 from .configure import Settings
@@ -254,7 +254,7 @@ class RedisConnect:
     
 
     @staticmethod
-    def get(model: _model, on_corrupt="flag", _set_fk: bool=True) -> Getter:
+    def get(model: _model, on_corrupt: Literal["flag", "skip", "ignore", "default"]="flag", _set_fk: bool=True) -> Getter:
         """
         Obtém dados do banco de dados baseado em modelos
 
@@ -277,6 +277,9 @@ class RedisConnect:
         if callable(model):
             model = RedisConnect._get_instance(model)
 
+        if on_corrupt == "default":
+            on_corrupt = model.__settings__.on_corrupt
+            
         if on_corrupt not in ["skip", "flag", "ignore"]:
             raise RedisConnectGetOnCorruptException(f'on_corrupt must be "flag", "skip" or "ignore"! on_corrupt: "{on_corrupt}"')
         
@@ -292,7 +295,11 @@ class RedisConnect:
             resp.pop("__referenced__", None)
 
             for key, value in resp.items():
-                typ: type = model.__annotations__[key]
+                pseudo_type: type = model.__annotations__[key]
+                typ: type = get_origin(pseudo_type)
+                if not typ:
+                    typ = pseudo_type
+
                 if typ in [list, dict, tuple]:
                     try:
                         value = value.decode("utf-8") if isinstance(value, bytes) else value

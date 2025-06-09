@@ -3,6 +3,8 @@ import json
 import dotenv
 import string
 
+from typing import Literal
+
 from ..exceptions.configure_exceptions import *
 
 
@@ -31,6 +33,7 @@ class Settings:
     separator: str
     prefix: str
     hash_algorithm: str
+    on_corrupt: Literal["flag", "skip", "ignore"]
 
 
     def __init__(self, path: str="redis_configure.json"):
@@ -153,7 +156,8 @@ class Settings:
             },
             "pools": {
                 "max_connections": 10,
-                "blocking_timeout": 3
+                "blocking_timeout": 3,
+                "on_corrupt": "flag"
             },
             "structure": {
                 "separator": ":",
@@ -237,6 +241,7 @@ class Settings:
             "prefix": "structure",
             "max_connections": "pools",
             "blocking_timeout": "pools",
+            "on_corrupt": "pools",
             "decode_response": "connection",
             "timeout": "connection",
             "retry_on_timeout": "connection",

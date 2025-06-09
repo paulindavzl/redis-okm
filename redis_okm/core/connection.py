@@ -254,7 +254,7 @@ class RedisConnect:
     
 
     @staticmethod
-    def get(model: _model, on_corrupt: Literal["flag", "skip", "ignore", "default"]="flag", _set_fk: bool=True) -> Getter:
+    def get(model: _model, on_corrupt: Literal["flag", "skip", "ignore", "default"]="default", _set_fk: bool=True) -> Getter:
         """
         Obtém dados do banco de dados baseado em modelos
 

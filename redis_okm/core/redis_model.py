@@ -10,7 +10,7 @@ class RedisModel:
     """
     Base para todos os modelos em RedisOKM
     """
-    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "to_dict", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__", "__params__", "__ignore__"]
+    __slots__ = ["__db__", "__instancied__", "__idname__", "__tablename__", "__autoid__", "__testing__", "__hashid__", "__settings__", "__expire__", "__to_dict__", "__action__", "__foreign_keys__", "__references__", "__key__", "__status__", "__params__", "__ignore__"]
 
     def _set_attributes(cls, ann: dict[str|type]):
         cls_name = cls.__name__ if callable(cls) else type(cls).__name__
@@ -78,7 +78,7 @@ class RedisModel:
         cls.__expire__ = expire
         cls.__action__ = action
         cls.__references__ = {}
-        cls.to_dict = {}
+        cls.__to_dict__ = {}
         cls.__status__ = True
         cls.__key__ = "__await_identify__"
         cls.__params__ = params
@@ -188,7 +188,7 @@ class RedisModel:
                     
                     setattr(self, ref, foreign_key)
                     self.__foreign_keys__[ref]["id"] = id
-                    self.to_dict[ref] = id
+                    self.__to_dict__[ref] = id
                     
 
             # passa as informações para o modelo caso ele aceite-as
@@ -215,7 +215,7 @@ class RedisModel:
             for attr, value in attrs.items():
                 setattr(self, attr, value)
 
-            self.to_dict = attrs # define to_dict
+            self.__to_dict__ = attrs # define to_dict
 
             ann = self.__annotations__ # recarrega __annotations__
             for attr in ann:
@@ -225,7 +225,7 @@ class RedisModel:
                         raise RedisModelAttributeException(f"{cls_name}: {attr} must receive a value!")
                     value = getattr(name, attr)
                     setattr(self, attr, value)
-                    self.to_dict[attr] = value
+                    self.__to_dict__[attr] = value
             
             self.__instancied__ = True
         else:
@@ -234,6 +234,17 @@ class RedisModel:
                 idname = self.__idname__
                 typ: type = self.__class__.__annotations__[idname]
                 setattr(self, idname, typ(identify))
+
+    
+    @property
+    def to_dict(self) -> dict:
+        for attr, value in self.__to_dict__.items():
+            n_value = self.__dict__[attr] 
+            if n_value != value:
+                self.__to_dict__[attr] = value
+        
+        return self.__to_dict__
+
 
         
      

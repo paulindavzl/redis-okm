@@ -179,11 +179,12 @@ class RedisModel:
                     id = typ_id(id)
                     f_id = {fk_idname:id} # filtro para id
 
-                    if not RedisConnect.get(fk_model).filter_by(**f_id):
+                    fk_returned = RedisConnect.get(fk_model).filter_by(**f_id)
+                    if fk_returned is None:
                         raise RedisModelForeignKeyException(f'{cls_name}: There is no record for foreign key "{ref}" ({fk_model.__name__}) with ID {id if isinstance(id, int) else f"{id}"}!')
 
                     def foreign_key() -> Return:
-                        fk = RedisConnect.get(fk_model).filter_by(**f_id)
+                        fk = fk_returned
                         return fk
                     
                     setattr(self, ref, foreign_key)

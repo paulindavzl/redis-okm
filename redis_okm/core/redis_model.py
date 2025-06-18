@@ -187,7 +187,7 @@ class RedisModel:
                         fk = fk_returned
                         return fk
                     
-                    setattr(self, ref, foreign_key)
+                    setattr(self, ref, foreign_key if self.__settings__.load_type == "lazy" else foreign_key())
                     self.__foreign_keys__[ref]["id"] = id
                     self.__to_dict__[ref] = id
                     

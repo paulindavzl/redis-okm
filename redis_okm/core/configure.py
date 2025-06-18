@@ -34,6 +34,7 @@ class Settings:
     prefix: str
     hash_algorithm: str
     on_corrupt: Literal["flag", "skip", "ignore"]
+    load_type: Literal["lazy", "eager"]
 
 
     def __init__(self, path: str="redis_configure.json"):
@@ -152,12 +153,16 @@ class Settings:
             "connection": {
                 "decode_response": True,
                 "timeout": 30,
-                "retry_on_timeout": [True, 3]
+                "retry_on_timeout": [
+                    True,
+                    3
+                ]
             },
             "pools": {
                 "max_connections": 10,
                 "blocking_timeout": 3,
-                "on_corrupt": "flag"
+                "on_corrupt": "flag",
+                "load_type": "lazy"
             },
             "structure": {
                 "separator": ":",
@@ -242,6 +247,7 @@ class Settings:
             "max_connections": "pools",
             "blocking_timeout": "pools",
             "on_corrupt": "pools",
+            "load": "pools",
             "decode_response": "connection",
             "timeout": "connection",
             "retry_on_timeout": "connection",
